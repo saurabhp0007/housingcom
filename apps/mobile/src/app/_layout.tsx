@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { ForceUpdateGate } from '@/features/app-updates/components/ForceUpdateGate';
 import { AppBootstrap } from '@/shared/components/AppBootstrap';
+import { OfflineBanner } from '@/shared/components/OfflineBanner';
 import { store } from '@/shared/store/store';
 
 export { ErrorBoundary } from 'expo-router';
@@ -28,6 +29,7 @@ export default function RootLayout() {
                   <ForceUpdateGate>
                     <RootNavigator />
                   </ForceUpdateGate>
+                  <OfflineBanner />
                 </AppBootstrap>
               </ToastProvider>
             </UiThemeProvider>

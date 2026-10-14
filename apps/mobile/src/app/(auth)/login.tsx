@@ -1,39 +1,37 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { AppText, Button, HStack, Screen, TextField, VStack, useTheme } from '@housingcom/ui';
 import { router } from 'expo-router';
+import { phoneSchema } from '@housingcom/contracts';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { z } from 'zod';
 import { SocialSignInButtons } from '@/features/auth/components/SocialSignInButtons';
 import {
   firebaseAuthService,
   firebaseErrorMessage,
 } from '@/features/auth/services/firebase-auth.service';
 
-const schema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number'),
-});
-type FormValues = z.infer<typeof schema>;
-
 export default function LoginScreen() {
   const { colors } = useTheme();
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState<string>();
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { phone: '' } });
+  const [isSubmitting, setSubmitting] = useState(false);
 
-  const onSubmit = handleSubmit(async ({ phone }) => {
+  const onSubmit = async () => {
+    // Same rule the API uses (shared contract).
+    if (!phoneSchema.safeParse(`+91${phone}`).success) {
+      setError('Enter a valid 10-digit mobile number');
+      return;
+    }
     setError(undefined);
+    setSubmitting(true);
     try {
       await firebaseAuthService.sendOtp(`+91${phone}`);
       router.push({ pathname: '/verify', params: { phone } });
     } catch (e) {
       setError(firebaseErrorMessage(e));
+    } finally {
+      setSubmitting(false);
     }
-  });
+  };
 
   return (
     <Screen
@@ -41,7 +39,7 @@ export default function LoginScreen() {
       edges={['bottom']}
       footer={
         <VStack gap="sm">
-          <Button label="Get OTP" loading={isSubmitting} onPress={onSubmit} />
+          <Button label="Get OTP" loading={isSubmitting} onPress={() => void onSubmit()} />
           <Button label="Skip for now" variant="text" onPress={() => router.back()} />
         </VStack>
       }
@@ -54,24 +52,21 @@ export default function LoginScreen() {
           </AppText>
         </VStack>
 
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field }) => (
-            <TextField
-              label="Mobile number"
-              prefix="+91"
-              placeholder="98765 43210"
-              keyboard="phone"
-              returnKey="go"
-              maxLength={10}
-              autoFocus
-              value={field.value}
-              onChangeText={(t) => field.onChange(t.replace(/\D/g, ''))}
-              onSubmit={() => void onSubmit()}
-              error={errors.phone?.message ?? error}
-            />
-          )}
+        <TextField
+          label="Mobile number"
+          prefix="+91"
+          placeholder="98765 43210"
+          keyboard="phone"
+          returnKey="go"
+          maxLength={10}
+          autoFocus
+          value={phone}
+          onChangeText={(t) => {
+            setPhone(t.replace(/\D/g, ''));
+            setError(undefined);
+          }}
+          onSubmit={() => void onSubmit()}
+          error={error}
         />
 
         <HStack align="center" gap="md">

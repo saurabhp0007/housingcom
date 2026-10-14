@@ -5,6 +5,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { otaConfig } from '../../config/configuration.js';
 import { QueueName } from '../../core/queue/queue.constants.js';
+import { AuthModule } from '../auth/auth.module.js';
 import { OtaAdminController } from './controllers/ota-admin.controller.js';
 import { OtaClientController } from './controllers/ota-client.controller.js';
 import { OtaUpdate } from './entities/ota-update.entity.js';
@@ -23,6 +24,7 @@ import { OtaSigningService } from './services/ota-signing.service.js';
 /** Self-hosted Expo Updates server: publish, serve, stage, monitor and roll back OTA updates. */
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([OtaUpdate]),
     BullModule.registerQueue({ name: QueueName.OtaHealth }),
     MulterModule.registerAsync({

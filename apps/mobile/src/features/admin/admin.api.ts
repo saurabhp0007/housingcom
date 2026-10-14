@@ -6,10 +6,14 @@ import type {
   ListingDetailResponse,
   ListingStatus,
   MyListingResponse,
+  OtaUpdateResponse,
+  Platform,
+  UpdateChannel,
   Paginated,
   UpsertAreaInput,
   UpsertCityInput,
   UserRole,
+  UpdateStatus,
   UserStatus,
   VerificationRequestResponse,
   VerificationStatus,
@@ -103,6 +107,22 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ['AdminUsers'],
     }),
 
+    // OTA updates
+    otaUpdates: build.query<
+      Paginated<OtaUpdateResponse>,
+      { platform?: Platform; channel?: UpdateChannel }
+    >({
+      query: (params) => ({ url: '/ota/updates', params: { ...params, limit: 50 } }),
+      providesTags: ['AdminOta'],
+    }),
+    changeOtaUpdate: build.mutation<
+      OtaUpdateResponse,
+      { id: string; rolloutPercent?: number; status?: UpdateStatus }
+    >({
+      query: ({ id, ...body }) => ({ url: `/ota/updates/${id}`, method: 'PATCH', body }),
+      invalidatesTags: ['AdminOta'],
+    }),
+
     // Cities & areas
     adminCities: build.query<AdminCity[], void>({
       query: () => '/admin/cities',
@@ -149,4 +169,6 @@ export const {
   useUpdateCityMutation,
   useCreateAreaMutation,
   useUpdateAreaMutation,
+  useOtaUpdatesQuery,
+  useChangeOtaUpdateMutation,
 } = adminApi;

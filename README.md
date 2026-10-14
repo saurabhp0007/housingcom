@@ -5,8 +5,7 @@ Turborepo monorepo: **NestJS API** + **Expo (React Native) app** + a self-hosted
 ```
 apps/
   api/          NestJS 12 · TypeORM · PostgreSQL + PostGIS · Redis + BullMQ · Firebase Admin
-  mobile/       Expo SDK 57 · Expo Router · Expo UI (Compose / SwiftUI) · Redux Toolkit + RTK Query
-  ota-console/  One HTML page to upload, stage, pause and roll back OTA updates
+  mobile/       Expo SDK 57 (iOS + Android only) · Expo Router · Expo UI · expo-maps · Redux Toolkit + RTK Query
 packages/
   contracts/    Shared enums, zod schemas and response types (API ⇄ app)
   ui/           Design system over @expo/ui: Material 3 on Android, SwiftUI on iOS
@@ -36,7 +35,6 @@ pnpm --filter @housingcom/mobile android   # dev build (Expo UI and Firebase nee
 | `pnpm db:migrate`                              | Run TypeORM migrations                          |
 | `pnpm ota:publish --channel production`        | Build and publish an OTA update                 |
 | `pnpm ota:record-runtime --channel production` | Register a shipped binary's runtime fingerprint |
-| `pnpm ota:console`                             | OTA console at http://localhost:4100            |
 
 ## Docs
 
@@ -47,7 +45,7 @@ pnpm --filter @housingcom/mobile android   # dev build (Expo UI and Firebase nee
 
 **Phase 1:** monorepo, API core (config, errors, envelope, guards, events, queues, cache, storage),
 auth (Firebase → JWT + rotating refresh sessions), users and lister mode, geo (PostGIS), remote app config,
-self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, console, CLI), and the app shell.
+self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, CLI), and the app shell.
 
 **Phase 2:**
 
@@ -62,7 +60,7 @@ self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, console,
   user search and block/unblock (takes effect immediately), and cities/areas management.
 - **App:**
   - lister drawer (my listings, a 5-step editor with a map pin and photo manager, verification)
-  - admin drawer
+  - admin drawer, including **App updates** (publish, stage, pause and roll back OTA updates from the phone)
   - public listing page (gallery, video, map, directions, share)
   - nearby listings on Home
 

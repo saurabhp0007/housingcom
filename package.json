@@ -17,8 +17,7 @@
     "infra:down": "docker compose down",
     "db:migrate": "pnpm --filter @housingcom/api migration:run",
     "ota:publish": "node scripts/ota-publish.mjs",
-    "ota:record-runtime": "node scripts/ota-record-runtime.mjs",
-    "ota:console": "node apps/ota-console/serve.mjs"
+    "ota:record-runtime": "node scripts/ota-record-runtime.mjs"
   },
   "devDependencies": {
     "adm-zip": "^0.6.1",

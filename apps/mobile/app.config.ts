@@ -25,6 +25,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: IS_PROD ? 'Housing' : `Housing (${APP_VARIANT})`,
   slug: 'housing',
+  // Native app only; the PRD excludes a website / web version.
+  platforms: ['ios', 'android'],
   scheme: 'housing',
   version: '1.0.0',
   orientation: 'portrait',
@@ -56,7 +58,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: false,
     usesAppleSignIn: true,
     googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? './firebase/GoogleService-Info.plist',
-    config: { googleMapsApiKey: process.env.GOOGLE_MAPS_IOS_API_KEY },
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
         'We use your location to show rooms, flats and PGs near you.',
@@ -82,7 +83,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-updates',
     'expo-secure-store',
     'expo-font',
-    'expo-web-browser',
     'expo-apple-authentication',
     [
       'expo-splash-screen',
@@ -108,6 +108,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-video',
+    // Google Maps on Android, Apple Maps on iOS (no Google key needed on iOS).
+    [
+      'expo-maps',
+      {
+        requestLocationPermission: true,
+        locationPermission: 'We use your location to show places near you.',
+      },
+    ],
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     [

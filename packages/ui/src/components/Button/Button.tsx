@@ -1,9 +1,24 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
-import { useTheme } from '../../theme/ThemeProvider';
-import { radius, typography } from '../../theme/tokens';
-import type { ButtonProps } from './types';
+import { Button as SwiftButton, ProgressView } from '@expo/ui/swift-ui';
+import {
+  buttonBorderShape,
+  buttonStyle,
+  controlSize,
+  disabled as disabledModifier,
+  frame,
+} from '@expo/ui/swift-ui/modifiers';
+import * as Haptics from 'expo-haptics';
+import { NativeHost } from '../../native/NativeHost';
+import type { ButtonProps, ButtonVariant } from './types';
 
-/** Fallback for platforms without @expo/ui native views (web, tests). */
+const styleFor: Record<ButtonVariant, Parameters<typeof buttonStyle>[0]> = {
+  primary: 'borderedProminent',
+  destructive: 'borderedProminent',
+  tonal: 'bordered',
+  outlined: 'bordered',
+  text: 'borderless',
+};
+
+/** Native SwiftUI button. */
 export function Button({
   label,
   onPress,
@@ -13,51 +28,29 @@ export function Button({
   fullWidth = variant === 'primary',
   testID,
 }: ButtonProps) {
-  const { colors } = useTheme();
-  const filled = variant === 'primary' || variant === 'destructive';
-  const background =
-    variant === 'destructive'
-      ? colors.danger
-      : variant === 'primary'
-        ? colors.primary
-        : variant === 'tonal'
-          ? colors.primaryMuted
-          : 'transparent';
-  const foreground = filled ? colors.onPrimary : colors.primary;
+  const isInteractive = !disabled && !loading;
+
+  const handlePress = () => {
+    void Haptics.selectionAsync();
+    onPress?.();
+  };
 
   return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: disabled || loading, busy: loading }}
-      disabled={disabled || loading}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        {
-          backgroundColor: background,
-          borderColor: variant === 'outlined' ? colors.border : 'transparent',
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
-          alignSelf: fullWidth ? 'stretch' : 'flex-start',
-        },
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator color={foreground} />
-      ) : (
-        <Text style={[typography.bodyStrong, { color: foreground }]}>{label}</Text>
-      )}
-    </Pressable>
+    <NativeHost matchContents={fullWidth ? { vertical: true } : true} testID={testID}>
+      <SwiftButton
+        role={variant === 'destructive' ? 'destructive' : 'default'}
+        onPress={isInteractive ? handlePress : undefined}
+        modifiers={[
+          buttonStyle(styleFor[variant]),
+          buttonBorderShape('capsule'),
+          controlSize('large'),
+          disabledModifier(!isInteractive),
+          ...(fullWidth ? [frame({ maxWidth: Number.POSITIVE_INFINITY })] : []),
+        ]}
+        label={loading ? undefined : label}
+      >
+        {loading ? <ProgressView /> : undefined}
+      </SwiftButton>
+    </NativeHost>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    height: 52,
-    paddingHorizontal: 24,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -2,9 +2,10 @@ import { AppText, Button, Card, HStack, Pill, VStack, useTheme } from '@housingc
 import { AMENITY_LABELS, type ListingDetailResponse } from '@housingcom/contracts';
 import { formatInr } from '@housingcom/utils';
 import type { ReactNode } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import * as Linking from 'expo-linking';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppMap } from '@/shared/components/map/AppMap';
 import { STATUS_META, listingTagline } from '../listing-labels';
 import { ListingGallery } from './ListingGallery';
 
@@ -19,12 +20,16 @@ interface ListingDetailViewProps {
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-function openDirections(lat: number, lng: number) {
+/** Opens turn-by-turn directions in the phone's Maps app (Apple Maps / Google Maps app), not a website. */
+function openDirections(lat: number, lng: number, label: string) {
   const url =
     Platform.OS === 'ios'
-      ? `https://maps.apple.com/?daddr=${lat},${lng}`
-      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-  void Linking.openURL(url);
+      ? `maps://?daddr=${lat},${lng}&dirflg=d`
+      : `google.navigation:q=${lat},${lng}`;
+  // Fallback: the generic geo: intent lets the user pick any installed maps app.
+  void Linking.openURL(url).catch(() =>
+    Linking.openURL(`geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`),
+  );
 }
 
 /** The listing page body, shared by the public page, the lister preview and admin review. */
@@ -122,28 +127,18 @@ export function ListingDetailView({ listing: l, showStatus, footer }: ListingDet
               <AppText variant="heading">Location</AppText>
               {l.address ? <AppText color="textSecondary">{l.address}</AppText> : null}
               <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
-                <MapView
+                <AppMap
                   style={styles.map}
-                  liteMode
-                  pointerEvents="none"
-                  initialRegion={{
-                    latitude: l.location.lat,
-                    longitude: l.location.lng,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }}
-                >
-                  <Marker
-                    coordinate={{ latitude: l.location.lat, longitude: l.location.lng }}
-                    pinColor={colors.primary}
-                  />
-                </MapView>
+                  interactive={false}
+                  initialCenter={l.location}
+                  markers={[{ id: l.id, ...l.location, title: l.title }]}
+                />
               </View>
               <Button
                 label="Get directions"
                 variant="tonal"
                 fullWidth={false}
-                onPress={() => openDirections(l.location!.lat, l.location!.lng)}
+                onPress={() => openDirections(l.location!.lat, l.location!.lng, l.title)}
               />
             </VStack>
           ) : null}

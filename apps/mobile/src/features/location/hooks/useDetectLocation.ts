@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { useCallback, useState } from 'react';
-import { Linking } from 'react-native';
+import * as Linking from 'expo-linking';
 import { useAppDispatch } from '@/shared/store/hooks';
 import { useLazyResolveLocationQuery } from '../geo.api';
 import { locationSelected, permissionChanged } from '../location.slice';

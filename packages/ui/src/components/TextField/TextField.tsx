@@ -17,7 +17,7 @@ const keyboardMap = {
 } as const satisfies Record<TextFieldKeyboard, string>;
 
 /**
- * iOS (SwiftUI TextField via @expo/ui) and web. The label, prefix and helper are RN views
+ * iOS: SwiftUI TextField via @expo/ui. The label, prefix and helper are RN views
  * around the native input so the field matches the Material layout used on Android.
  */
 export function TextField({

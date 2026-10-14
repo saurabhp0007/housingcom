@@ -42,6 +42,6 @@ import { TokenService } from './services/token.service.js';
     { provide: APP_GUARD, useClass: AccessTokenGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
-  exports: [TokenService],
+  exports: [TokenService, UserBlocklistService],
 })
 export class AuthModule {}

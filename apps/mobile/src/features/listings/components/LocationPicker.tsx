@@ -4,8 +4,8 @@ import * as Location from 'expo-location';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import MapView, { type Region } from 'react-native-maps';
 import { useResolveLocationQuery } from '@/features/location/geo.api';
+import { AppMap, type AppMapHandle } from '@/shared/components/map/AppMap';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { useAppSelector } from '@/shared/store/hooks';
 
@@ -21,13 +21,6 @@ interface LocationPickerProps {
   height?: number;
 }
 
-const toRegion = ({ lat, lng }: Coordinates): Region => ({
-  latitude: lat,
-  longitude: lng,
-  latitudeDelta: 0.008,
-  longitudeDelta: 0.008,
-});
-
 /** Drag the map under a fixed centre pin, the standard pattern for precise placement. */
 export function LocationPicker({
   value,
@@ -37,9 +30,10 @@ export function LocationPicker({
   height = 260,
 }: LocationPickerProps) {
   const { colors, radius } = useTheme();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<AppMapHandle>(null);
   const fallback = useAppSelector((s) => s.location.selected?.coords) ?? DEFAULT_CENTER;
-  const [center, setCenter] = useState<Coordinates>(value ?? fallback);
+  const [initial] = useState<Coordinates>(() => value ?? fallback);
+  const [center, setCenter] = useState<Coordinates>(initial);
   const [locating, setLocating] = useState(false);
   const settled = useDebouncedValue(center, 500);
 
@@ -70,7 +64,7 @@ export function LocationPicker({
       if (!permission.granted) return;
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      mapRef.current?.animateToRegion(toRegion(next), 400);
+      mapRef.current?.moveTo(next, 16);
       setCenter(next);
     } finally {
       setLocating(false);
@@ -80,13 +74,13 @@ export function LocationPicker({
   return (
     <VStack gap="sm">
       <View style={{ height, borderRadius: radius.lg, overflow: 'hidden' }}>
-        <MapView
+        <AppMap
           ref={mapRef}
           style={StyleSheet.absoluteFill}
-          initialRegion={toRegion(center)}
-          onRegionChangeComplete={(r) => setCenter({ lat: r.latitude, lng: r.longitude })}
+          initialCenter={initial}
+          initialZoom={16}
           showsUserLocation
-          toolbarEnabled={false}
+          onCameraMove={setCenter}
         />
         {/* Fixed centre pin; its tip marks the exact point. */}
         <View pointerEvents="none" style={styles.pinWrap}>

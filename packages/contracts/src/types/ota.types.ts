@@ -5,7 +5,7 @@ import type {
   UpdateStatus,
 } from '../enums/ota.enums.js';
 
-/** An OTA update as shown in the OTA console. */
+/** An OTA update as shown in the in-app Admin → App updates screen. */
 export interface OtaUpdateResponse {
   id: string;
   platform: Platform;

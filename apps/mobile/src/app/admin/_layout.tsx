@@ -29,6 +29,7 @@ export default function AdminLayout() {
       <Drawer.Screen name="verifications" options={{ title: 'Lister verification' }} />
       <Drawer.Screen name="users" options={{ title: 'Users' }} />
       <Drawer.Screen name="cities" options={{ title: 'Cities & areas' }} />
+      <Drawer.Screen name="updates" options={{ title: 'App updates' }} />
     </Drawer>
   );
 }

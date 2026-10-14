@@ -1,7 +1,11 @@
-import { ActivityIndicator } from 'react-native';
-import { useTheme } from '../../theme/ThemeProvider';
+import { ProgressView } from '@expo/ui/swift-ui';
+import { NativeHost } from '../../native/NativeHost';
 
+/** Native SwiftUI activity spinner. */
 export function Loader() {
-  const { colors } = useTheme();
-  return <ActivityIndicator color={colors.primary} />;
+  return (
+    <NativeHost>
+      <ProgressView />
+    </NativeHost>
+  );
 }

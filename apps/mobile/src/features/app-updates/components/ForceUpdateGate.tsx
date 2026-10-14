@@ -1,7 +1,8 @@
 import { AppText, Button, Screen, VStack, useToast } from '@housingcom/ui';
 import { isVersionBelow } from '@housingcom/utils';
 import { useEffect, useRef, type PropsWithChildren } from 'react';
-import { Linking, Platform } from 'react-native';
+import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 import { env } from '@/shared/config/env';
 import { useAppConfigQuery } from '../../app-config/app-config.api';
 

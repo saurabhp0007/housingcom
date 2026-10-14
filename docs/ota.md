@@ -25,7 +25,7 @@ export OTA_API_URL=https://api.example.com/api OTA_ADMIN_TOKEN=...
 pnpm ota:publish --channel production --rollout 10 --message "Fix OTP crash"
 pnpm ota:publish --channel production --critical    # applied immediately on launch
 
-# Or build only, then upload the zip on the console (pnpm ota:console) or with curl:
+# Or build only, then publish the zip from the app (Admin → App updates → Publish update), or with curl:
 pnpm ota:publish --channel production --dry-run
 curl -X POST "$OTA_API_URL/ota/updates" -H "Authorization: Bearer $OTA_ADMIN_TOKEN" \
   -F bundle=@.ota/update-production-<ts>.zip -F channel=production -F rolloutPercent=100
@@ -38,7 +38,7 @@ curl -X POST "$OTA_API_URL/ota/updates" -H "Authorization: Bearer $OTA_ADMIN_TOK
 | New update crashes on launch | expo-updates falls back to the previous bundle and reports the update ID in `Expo-Recent-Failed-Update-IDs`. The server never serves that update to that device again.                   |
 | Crash rate climbs            | The app sends `launched` / `crashed` beacons. A BullMQ worker **auto-pauses** the update when the crash rate ≥ `OTA_AUTO_PAUSE_CRASH_RATE` after `OTA_AUTO_PAUSE_MIN_LAUNCHES` launches. |
 | Update paused / rolled back  | Devices get the previous good update, or a `rollBackToEmbedded` directive if none remains.                                                                                               |
-| Staged rollout               | `rolloutPercent` buckets devices deterministically by `EAS-Client-ID`. Raise it from the console.                                                                                        |
+| Staged rollout               | `rolloutPercent` buckets devices deterministically by `EAS-Client-ID`. Raise it in the app: Admin → App updates.                                                                         |
 | Native binary too old        | `/app-config` `minSupportedVersion` shows a blocking "Update from store" screen. `latestVersion` shows a soft nudge.                                                                     |
 
 Manifest and asset endpoints are not rate-limited, because many phones share IPs behind carrier NAT.

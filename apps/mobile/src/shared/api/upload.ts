@@ -3,12 +3,19 @@ import { env } from '../config/env';
 import { store } from '../store/store';
 import { refreshAccessToken } from './token-refresh';
 
-export interface UploadPart {
+export interface UploadFilePart {
   field: string;
   uri: string;
   name: string;
   type: string;
 }
+
+export interface UploadTextPart {
+  field: string;
+  value: string;
+}
+
+export type UploadPart = UploadFilePart | UploadTextPart;
 
 export class UploadError extends Error {
   constructor(
@@ -47,8 +54,10 @@ export async function uploadMultipart<T>(
       };
       const form = new FormData();
       // React Native's FormData accepts { uri, name, type } file descriptors.
-      for (const p of parts)
-        form.append(p.field, { uri: p.uri, name: p.name, type: p.type } as unknown as Blob);
+      for (const p of parts) {
+        if ('value' in p) form.append(p.field, p.value);
+        else form.append(p.field, { uri: p.uri, name: p.name, type: p.type } as unknown as Blob);
+      }
       xhr.send(form);
     });
 

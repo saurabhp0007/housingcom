@@ -8,7 +8,7 @@ import type { ToastHostProps, ToastOptions } from './types';
 
 const DURATION_MS = { short: 3000, long: 10000 } as const;
 
-/** iOS / web: animated toast styled like a floating snackbar. Queues like the Android host. */
+/** iOS: animated toast styled like a floating snackbar. Queues like the Android host. */
 export function ToastHost({ ref, bottomOffset }: ToastHostProps) {
   const { colors } = useTheme();
   const [current, setCurrent] = useState<ToastOptions | null>(null);

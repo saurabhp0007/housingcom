@@ -8,7 +8,7 @@
  * Env: OTA_API_URL (e.g. https://api.example.com/api), OTA_ADMIN_TOKEN.
  *
  * Steps: fingerprint guard → expo export → expoConfig.json + ota.json → zip → upload.
- * The same zip can be uploaded by hand on the OTA console page.
+ * The same zip can be published from the app: Admin → App updates → Publish update.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -97,7 +97,7 @@ console.log(`\n▸ Bundle: ${zipPath}`);
 
 if (args['dry-run']) {
   console.log(
-    '\n✔ Dry run: not uploaded. Upload this zip on the OTA console, or rerun without --dry-run.\n',
+    '\n✔ Dry run: not uploaded. Publish this zip from the app (Admin → App updates), or rerun without --dry-run.\n',
   );
   process.exit(0);
 }

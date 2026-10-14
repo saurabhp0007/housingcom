@@ -18,6 +18,7 @@ import { authApi } from '@/features/auth/auth.api';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { useMyVerificationQuery, verificationApi } from '@/features/verification/verification.api';
 import { uploadMultipart } from '@/shared/api/upload';
+import { prepareImageForUpload } from '@/shared/media/prepare-image';
 import { useAppDispatch } from '@/shared/store/hooks';
 import { userUpdated } from '@/shared/store/session.slice';
 
@@ -54,16 +55,14 @@ export default function VerificationScreen() {
     if (!docs.idProof || !docs.propertyProof) return;
     setProgress(0);
     try {
-      await uploadMultipart(
-        '/me/verification',
-        DOCS.map(({ key }) => ({
+      // Documents keep more resolution so small print stays readable.
+      const parts = await Promise.all(
+        DOCS.map(async ({ key }) => ({
           field: key,
-          uri: docs[key]!.uri,
-          name: `${key}.jpg`,
-          type: docs[key]!.mimeType ?? 'image/jpeg',
+          ...(await prepareImageForUpload(docs[key]!, 2400)),
         })),
-        setProgress,
       );
+      await uploadMultipart('/me/verification', parts, setProgress);
       dispatch(verificationApi.util.invalidateTags(['Verification']));
       setDocs({});
       toast.show('Documents submitted for review');

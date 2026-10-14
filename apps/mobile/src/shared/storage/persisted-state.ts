@@ -1,12 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Storage from 'expo-sqlite/kv-store';
 
 const PREFIX = 'state.v1.';
 
-/** Tiny persistence for non-sensitive slices (e.g. selected location, preferences). */
+/** SQLite-backed key-value persistence (expo-sqlite/kv-store) for non-sensitive slices (e.g. selected location, preferences). */
 export const persistedState = {
   async load<T>(key: string): Promise<T | undefined> {
     try {
-      const raw = await AsyncStorage.getItem(PREFIX + key);
+      const raw = await Storage.getItem(PREFIX + key);
       return raw ? (JSON.parse(raw) as T) : undefined;
     } catch {
       return undefined;
@@ -14,7 +14,7 @@ export const persistedState = {
   },
   async save(key: string, value: unknown): Promise<void> {
     try {
-      await AsyncStorage.setItem(PREFIX + key, JSON.stringify(value));
+      await Storage.setItem(PREFIX + key, JSON.stringify(value));
     } catch {
       // Persistence is best-effort; the app works without it.
     }

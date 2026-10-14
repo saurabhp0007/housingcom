@@ -25,7 +25,7 @@ import { toOtaUpdateResponse } from '../mappers/ota-update.mapper.js';
 import { OtaAdminService } from '../services/ota-admin.service.js';
 import { OtaPublishService } from '../services/ota-publish.service.js';
 
-/** Used by the OTA console page and `pnpm ota:publish` (Bearer OTA_ADMIN_TOKEN). */
+/** Used by the in-app Admin → App updates screen (admin JWT) and `pnpm ota:publish` (OTA token). */
 @ApiTags('OTA (admin)')
 @ApiBearerAuth()
 @Public()
