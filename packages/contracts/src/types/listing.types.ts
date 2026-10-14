@@ -8,6 +8,7 @@ import type {
   SharingType,
 } from '../enums/listing.enums.js';
 import type { Coordinates } from '../schemas/common.schema.js';
+import type { NearbyPlaceResponse } from './search.types.js';
 
 export interface ListingMediaResponse {
   id: string;
@@ -57,6 +58,8 @@ export interface ListingDetailResponse extends ListingCardResponse {
   cityId: string | null;
   media: ListingMediaResponse[];
   owner: ListingOwnerSummary;
+  /** Nearest metro, bus stop, college and hospital (when places data is available). */
+  nearbyPlaces: NearbyPlaceResponse[];
   status: ListingStatus;
   /** Owner / admin only. */
   rejectionReason?: string | null;

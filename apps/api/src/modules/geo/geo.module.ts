@@ -17,6 +17,6 @@ import { GeoService } from './services/geo.service.js';
     GeoAdminService,
     { provide: GEO_REPOSITORY, useClass: TypeOrmGeoRepository },
   ],
-  exports: [GeoService],
+  exports: [GeoService, GEO_REPOSITORY],
 })
 export class GeoModule {}

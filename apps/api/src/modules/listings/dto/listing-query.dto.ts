@@ -19,50 +19,6 @@ import {
   type BrowseListingsQuery,
 } from '@housingcom/contracts';
 
-export class BrowseListingsQueryDto implements Partial<BrowseListingsQuery> {
-  @IsOptional()
-  @Type(() => Number)
-  @IsLatitude()
-  lat?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsLongitude()
-  lng?: number;
-
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0.5)
-  @Max(50)
-  radiusKm: number = 10;
-
-  @IsOptional()
-  @IsUUID()
-  cityId?: string;
-
-  @IsOptional()
-  @IsUUID()
-  areaId?: string;
-
-  @IsOptional()
-  @IsIn(Object.values(ListingType))
-  type?: ListingType;
-
-  @IsIn(Object.values(ListingSort))
-  sort: ListingSort = ListingSort.Newest;
-
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page: number = 1;
-
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(50)
-  limit: number = 20;
-}
-
 export class MyListingsQueryDto {
   @IsOptional()
   @IsIn(Object.values(ListingStatus))

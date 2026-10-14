@@ -7,6 +7,7 @@ import { City } from '../entities/city.entity.js';
 import { toPoint } from '../../../core/utils/geo.util.js';
 import type {
   AreaData,
+  AreaMatch,
   AreaWithDistance,
   CityData,
   GeoRepository,
@@ -55,6 +56,22 @@ export class TypeOrmGeoRepository implements GeoRepository {
       area,
       distanceKm: Number(raw[i]?.distance_m ?? 0) / 1000,
     }));
+  }
+
+  async searchAreas(q: string, limit: number): Promise<AreaMatch[]> {
+    const { entities, raw } = await this.areas
+      .createQueryBuilder('area')
+      .innerJoin('area.city', 'city')
+      .addSelect('city.name', 'city_name')
+      .addSelect('similarity(area.name, :q)', 'score')
+      .where('area.is_active = true AND city.is_active = true')
+      .andWhere('(area.name % :q OR area.name ILIKE :prefix)')
+      .setParameters({ q, prefix: `${q.replace(/[%_\\]/g, '\\$&')}%` })
+      .orderBy('score', 'DESC')
+      .addOrderBy('area.is_popular', 'DESC')
+      .limit(limit)
+      .getRawAndEntities<{ city_name: string }>();
+    return entities.map((area, i) => ({ area, cityName: raw[i]!.city_name }));
   }
 
   findAllCities(): Promise<City[]> {

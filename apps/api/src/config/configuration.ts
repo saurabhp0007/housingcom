@@ -80,9 +80,13 @@ export const otaConfig = registerAs('ota', () => {
   };
 });
 
-export const geoConfig = registerAs('geo', () => ({
-  serviceableRadiusKm: env().GEO_SERVICEABLE_RADIUS_KM,
-}));
+export const geoConfig = registerAs('geo', () => {
+  const e = env();
+  return {
+    serviceableRadiusKm: e.GEO_SERVICEABLE_RADIUS_KM,
+    googlePlacesApiKey: e.GOOGLE_PLACES_API_KEY,
+  };
+});
 
 export const allConfigs = [
   appConfig,

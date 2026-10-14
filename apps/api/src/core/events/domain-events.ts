@@ -50,6 +50,8 @@ export const ListingEvent = {
   Rejected: 'listing.rejected',
   StatusChanged: 'listing.status_changed',
   Viewed: 'listing.viewed',
+  LocationChanged: 'listing.location_changed',
+  Shared: 'listing.shared',
 } as const;
 
 export interface ListingStatusEvent {
@@ -64,6 +66,10 @@ export interface ListingStatusEvent {
 export interface ListingViewedEvent {
   listingId: string;
   viewerId: string | null;
+}
+
+export interface ListingLocationChangedEvent {
+  listingId: string;
 }
 
 export const UserAdminEvent = {

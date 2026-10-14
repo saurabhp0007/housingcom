@@ -22,6 +22,8 @@ import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ListingsModule } from './modules/listings/listings.module.js';
 import { OtaModule } from './modules/ota/ota.module.js';
+import { PlacesModule } from './modules/places/places.module.js';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VerificationModule } from './modules/verification/verification.module.js';
 
@@ -78,6 +80,8 @@ import { VerificationModule } from './modules/verification/verification.module.j
     ListingsModule,
     VerificationModule,
     AdminModule,
+    PlacesModule,
+    RecommendationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

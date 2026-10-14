@@ -5,3 +5,4 @@ export * from './app-config.types.js';
 export * from './ota.types.js';
 export * from './listing.types.js';
 export * from './admin.types.js';
+export * from './search.types.js';

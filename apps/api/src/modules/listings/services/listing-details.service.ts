@@ -30,11 +30,12 @@ export class ListingDetailsService {
   }
 
   async build(row: ListingRow, privileged: boolean): Promise<ListingDetailResponse> {
-    const [media, owner] = await Promise.all([
+    const [media, owner, nearby] = await Promise.all([
       this.media.list(row.listing.id),
       this.users.getById(row.listing.ownerId),
+      this.listings.findNearbyPlaces(row.listing.id),
     ]);
-    return this.mapper.detail(row, media, owner, privileged);
+    return this.mapper.detail(row, media, owner, nearby, privileged);
   }
 
   /** Owner or admin view (any status, with moderation fields). */

@@ -14,6 +14,8 @@ export class Area extends BaseEntity {
   @JoinColumn({ name: 'city_id' })
   city?: Relation<City>;
 
+  /** Trigram GIN index for typo-tolerant search (created in a migration; pg_trgm). */
+  @Index('IDX_areas_name_trgm', { synchronize: false })
   @Column({ type: 'varchar', length: 100 })
   name: string;
 

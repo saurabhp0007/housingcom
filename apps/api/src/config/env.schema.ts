@@ -51,6 +51,8 @@ export const envSchema = z.object({
   OTA_AUTO_PAUSE_MIN_LAUNCHES: z.coerce.number().int().min(1).default(50),
 
   GEO_SERVICEABLE_RADIUS_KM: z.coerce.number().positive().default(15),
+  /** Google Places API (New). Optional: without it, search uses our own areas only. */
+  GOOGLE_PLACES_API_KEY: optionalString,
 
   THROTTLE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),

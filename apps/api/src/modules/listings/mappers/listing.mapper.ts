@@ -9,7 +9,7 @@ import { PublicUrlService } from '../../../core/media/public-url.service.js';
 import { fromPoint } from '../../../core/utils/geo.util.js';
 import type { User } from '../../users/entities/user.entity.js';
 import type { ListingMedia } from '../entities/listing-media.entity.js';
-import type { ListingRow } from '../interfaces/listings-repository.interface.js';
+import type { ListingRow, NearbyPlaceRow } from '../interfaces/listings-repository.interface.js';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -76,6 +76,7 @@ export class ListingMapper {
     row: ListingRow,
     media: ListingMedia[],
     owner: User,
+    nearby: NearbyPlaceRow[],
     privileged: boolean,
   ): ListingDetailResponse {
     const l = row.listing;
@@ -89,6 +90,7 @@ export class ListingMapper {
       areaId: l.areaId,
       cityId: l.cityId,
       media: media.map((m) => this.media(m)),
+      nearbyPlaces: nearby.map((p) => ({ category: p.category, name: p.name, distanceKm: round2(p.distanceM / 1000) })),
       owner: {
         id: owner.id,
         name: owner.fullName,

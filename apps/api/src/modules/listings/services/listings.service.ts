@@ -12,7 +12,11 @@ import {
 import type { DeepPartial } from 'typeorm';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
-import { ListingEvent, type ListingStatusEvent } from '../../../core/events/domain-events.js';
+import {
+  ListingEvent,
+  type ListingLocationChangedEvent,
+  type ListingStatusEvent,
+} from '../../../core/events/domain-events.js';
 import { fromPoint, toPoint } from '../../../core/utils/geo.util.js';
 import { GeoService } from '../../geo/services/geo.service.js';
 import { UsersService } from '../../users/services/users.service.js';
@@ -71,6 +75,9 @@ export class ListingsService {
     const listing = await this.assertOwned(userId, id);
     const columns = await this.toColumns(dto);
     await this.applyEdit(listing, userId, columns);
+    if (dto.location) {
+      this.events.emit(ListingEvent.LocationChanged, { listingId: id } satisfies ListingLocationChangedEvent);
+    }
     return this.details.forPrivileged(id);
   }
 

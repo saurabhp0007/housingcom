@@ -1,4 +1,13 @@
-import type { ListingSort, ListingStatus, ListingType, Paginated } from '@housingcom/contracts';
+import type {
+  ListingFilters,
+  ListingSort,
+  ListingStatus,
+  ListingType,
+  MapResponse,
+  NearbyPlaceCategory,
+  Paginated,
+  RecommendationWeights,
+} from '@housingcom/contracts';
 import type { DeepPartial } from 'typeorm';
 import type { Listing } from '../entities/listing.entity.js';
 
@@ -15,15 +24,32 @@ export interface ListingRow {
   distanceKm?: number;
 }
 
-export interface BrowseFilter {
+export interface SearchParams {
+  filters: ListingFilters;
   point?: { lat: number; lng: number };
   radiusKm: number;
   cityId?: string;
   areaId?: string;
-  type?: ListingType;
   sort: ListingSort;
   page: number;
   limit: number;
+  /** Ranking inputs (sort = recommended). */
+  weights: RecommendationWeights;
+  affinity: { types: Record<string, number>; areas: Record<string, number> };
+  budget: number | null;
+}
+
+export interface MapParams {
+  filters: ListingFilters;
+  bbox: { minLat: number; minLng: number; maxLat: number; maxLng: number };
+  /** Above this many listings in view, return grid clusters instead of pins. */
+  maxPins: number;
+}
+
+export interface NearbyPlaceRow {
+  category: NearbyPlaceCategory;
+  name: string;
+  distanceM: number;
 }
 
 export interface ListingsRepository {
@@ -33,9 +59,15 @@ export interface ListingsRepository {
   update(id: string, data: DeepPartial<Listing>): Promise<void>;
   softDelete(id: string): Promise<void>;
   findByOwner(ownerId: string, status?: ListingStatus): Promise<ListingRow[]>;
-  browseLive(filter: BrowseFilter): Promise<Paginated<ListingRow>>;
   findByStatus(status: ListingStatus, page: number, limit: number): Promise<Paginated<ListingRow>>;
   incrementViews(id: string): Promise<void>;
   countByStatus(): Promise<Partial<Record<ListingStatus, number>>>;
   countByOwner(ownerIds: string[]): Promise<Map<string, number>>;
+
+  // ── Phase 3: search, map, similar, nearby places ──
+  search(params: SearchParams): Promise<Paginated<ListingRow>>;
+  map(params: MapParams): Promise<MapResponse>;
+  similar(listing: Listing, limit: number): Promise<ListingRow[]>;
+  findNearbyPlaces(listingId: string): Promise<NearbyPlaceRow[]>;
+  replaceNearbyPlaces(listingId: string, places: NearbyPlaceRow[]): Promise<void>;
 }

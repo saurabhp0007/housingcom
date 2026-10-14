@@ -55,8 +55,10 @@ export const ListingAction = {
 export type ListingAction = (typeof ListingAction)[keyof typeof ListingAction];
 
 export const ListingSort = {
-  Newest: 'newest',
+  Recommended: 'recommended',
   Nearest: 'nearest',
+  Newest: 'newest',
+  MostViewed: 'most_viewed',
 } as const;
 export type ListingSort = (typeof ListingSort)[keyof typeof ListingSort];
 
@@ -111,3 +113,27 @@ export const LISTING_LIMITS = {
   maxImageBytes: 15 * 1024 * 1024,
   maxVideoBytes: 60 * 1024 * 1024,
 } as const;
+
+/** User actions that feed the recommendation engine ("learns from activity"). */
+export const ListingEventType = {
+  View: 'view',
+  Share: 'share',
+  Save: 'save',
+  Contact: 'contact',
+} as const;
+export type ListingEventType = (typeof ListingEventType)[keyof typeof ListingEventType];
+
+export const NearbyPlaceCategory = {
+  Metro: 'metro',
+  BusStop: 'bus_stop',
+  College: 'college',
+  Hospital: 'hospital',
+} as const;
+export type NearbyPlaceCategory = (typeof NearbyPlaceCategory)[keyof typeof NearbyPlaceCategory];
+
+export const NEARBY_PLACE_LABELS: Record<NearbyPlaceCategory, string> = {
+  metro: 'Metro',
+  bus_stop: 'Bus stop',
+  college: 'College',
+  hospital: 'Hospital',
+};
