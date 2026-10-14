@@ -10,7 +10,10 @@ import {
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
 import { ListingEvent, type ListingStatusEvent } from '../../../core/events/domain-events.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 import { ListingMapper } from '../mappers/listing.mapper.js';
 import { transition } from '../policies/listing-status.policy.js';
 import { ListingDetailsService } from './listing-details.service.js';
@@ -25,7 +28,11 @@ export class ListingModerationService {
     private readonly events: EventEmitter2,
   ) {}
 
-  async queue(status: ListingStatus, page: number, limit: number): Promise<Paginated<MyListingResponse>> {
+  async queue(
+    status: ListingStatus,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<MyListingResponse>> {
     const result = await this.listings.findByStatus(status, page, limit);
     return { items: result.items.map((r) => this.mapper.mine(r)), meta: result.meta };
   }
@@ -37,21 +44,29 @@ export class ListingModerationService {
   async approve(adminId: string, id: string): Promise<ListingDetailResponse> {
     const listing = await this.load(id);
     const result = transition(listing.status, ListingAction.Approve, { isVerifiedLister: false });
-    if (!result.allowed) throw AppException.conflict(ErrorCode.ListingTransitionNotAllowed, result.reason);
+    if (!result.allowed)
+      throw AppException.conflict(ErrorCode.ListingTransitionNotAllowed, result.reason);
 
     await this.listings.update(id, {
       status: ListingStatus.Live,
       rejectionReason: null,
       ...(listing.publishedAt ? {} : { publishedAt: new Date() }),
     });
-    this.emit(ListingEvent.Approved, { listingId: id, ownerId: listing.ownerId, from: listing.status, to: ListingStatus.Live, actorId: adminId });
+    this.emit(ListingEvent.Approved, {
+      listingId: id,
+      ownerId: listing.ownerId,
+      from: listing.status,
+      to: ListingStatus.Live,
+      actorId: adminId,
+    });
     return this.details.forPrivileged(id);
   }
 
   async reject(adminId: string, id: string, reason: string): Promise<ListingDetailResponse> {
     const listing = await this.load(id);
     const result = transition(listing.status, ListingAction.Reject, { isVerifiedLister: false });
-    if (!result.allowed) throw AppException.conflict(ErrorCode.ListingTransitionNotAllowed, result.reason);
+    if (!result.allowed)
+      throw AppException.conflict(ErrorCode.ListingTransitionNotAllowed, result.reason);
 
     await this.listings.update(id, { status: ListingStatus.Rejected, rejectionReason: reason });
     this.emit(ListingEvent.Rejected, {

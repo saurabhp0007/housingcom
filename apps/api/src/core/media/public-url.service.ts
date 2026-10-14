@@ -18,7 +18,10 @@ export class PublicUrlService {
   url(key: string | null): string | null;
   url(key: string | null): string | null {
     if (!key) return null;
-    if (!PUBLIC_KEY_PREFIXES.some((p) => key.startsWith(p))) throw new Error(`Key is not public: ${key}`);
-    return this.storage.publicUrl(key) ?? `${this.app.publicBaseUrl}/${this.app.apiPrefix}/files/${key}`;
+    if (!PUBLIC_KEY_PREFIXES.some((p) => key.startsWith(p)))
+      throw new Error(`Key is not public: ${key}`);
+    return (
+      this.storage.publicUrl(key) ?? `${this.app.publicBaseUrl}/${this.app.apiPrefix}/files/${key}`
+    );
   }
 }

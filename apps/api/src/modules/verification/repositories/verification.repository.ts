@@ -8,7 +8,10 @@ import type { VerificationRepository } from '../interfaces/verification-reposito
 
 @Injectable()
 export class TypeOrmVerificationRepository implements VerificationRepository {
-  constructor(@InjectRepository(VerificationRequest) private readonly requests: Repository<VerificationRequest>) {}
+  constructor(
+    @InjectRepository(VerificationRequest)
+    private readonly requests: Repository<VerificationRequest>,
+  ) {}
 
   create(data: Pick<VerificationRequest, 'userId' | 'idDocumentKey' | 'propertyDocumentKey'>) {
     return this.requests.save(this.requests.create(data));
@@ -26,7 +29,11 @@ export class TypeOrmVerificationRepository implements VerificationRepository {
     return (await this.requests.countBy({ userId, status: VerificationStatus.Pending })) > 0;
   }
 
-  async findByStatus(status: VerificationStatus, page: number, limit: number): Promise<Paginated<VerificationRequest>> {
+  async findByStatus(
+    status: VerificationStatus,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<VerificationRequest>> {
     const [items, total] = await this.requests.findAndCount({
       where: { status },
       relations: { user: { listerProfile: true } },
@@ -41,7 +48,10 @@ export class TypeOrmVerificationRepository implements VerificationRepository {
     return this.requests.countBy({ status });
   }
 
-  async review(id: string, data: Pick<VerificationRequest, 'status' | 'reviewedBy' | 'reviewedAt' | 'rejectionReason'>) {
+  async review(
+    id: string,
+    data: Pick<VerificationRequest, 'status' | 'reviewedBy' | 'reviewedAt' | 'rejectionReason'>,
+  ) {
     await this.requests.update({ id }, data);
   }
 }

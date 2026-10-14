@@ -12,7 +12,10 @@ import { AppException } from '../../../core/errors/app.exception.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
 import { UserAdminEvent, type UserModeratedEvent } from '../../../core/events/domain-events.js';
 import { ImageProcessingService } from '../../../core/media/image-processing.service.js';
-import { OBJECT_STORAGE, type ObjectStorage } from '../../../core/storage/object-storage.interface.js';
+import {
+  OBJECT_STORAGE,
+  type ObjectStorage,
+} from '../../../core/storage/object-storage.interface.js';
 import { UsersService } from '../../users/services/users.service.js';
 import {
   VERIFICATION_REPOSITORY,
@@ -39,19 +42,31 @@ export class VerificationService {
   ) {}
 
   async mine(userId: string): Promise<MyVerificationResponse> {
-    const [user, latest] = await Promise.all([this.users.getById(userId), this.requests.findLatestForUser(userId)]);
+    const [user, latest] = await Promise.all([
+      this.users.getById(userId),
+      this.requests.findLatestForUser(userId),
+    ]);
     return {
       isVerified: user.listerProfile?.isVerified ?? false,
       latest: latest ? toVerificationResponse(latest) : null,
     };
   }
 
-  async submit(userId: string, idProof: DocumentUpload, propertyProof: DocumentUpload): Promise<MyVerificationResponse> {
+  async submit(
+    userId: string,
+    idProof: DocumentUpload,
+    propertyProof: DocumentUpload,
+  ): Promise<MyVerificationResponse> {
     const user = await this.users.getById(userId);
-    if (!user.listerProfile) throw AppException.forbidden(ErrorCode.NotALister, 'Switch to lister mode first');
-    if (user.listerProfile.isVerified) throw AppException.conflict(ErrorCode.AlreadyVerified, 'You are already verified');
+    if (!user.listerProfile)
+      throw AppException.forbidden(ErrorCode.NotALister, 'Switch to lister mode first');
+    if (user.listerProfile.isVerified)
+      throw AppException.conflict(ErrorCode.AlreadyVerified, 'You are already verified');
     if (await this.requests.hasPending(userId)) {
-      throw AppException.conflict(ErrorCode.VerificationAlreadyPending, 'Your documents are already under review');
+      throw AppException.conflict(
+        ErrorCode.VerificationAlreadyPending,
+        'Your documents are already under review',
+      );
     }
 
     const [idKey, propertyKey] = await Promise.all([
@@ -62,7 +77,11 @@ export class VerificationService {
     return this.mine(userId);
   }
 
-  async queue(status: VerificationStatus, page: number, limit: number): Promise<Paginated<VerificationRequestResponse>> {
+  async queue(
+    status: VerificationStatus,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<VerificationRequestResponse>> {
     const result = await this.requests.findByStatus(status, page, limit);
     return { items: result.items.map((r) => toVerificationResponse(r, true)), meta: result.meta };
   }
@@ -78,7 +97,8 @@ export class VerificationService {
   /** Streams a private document to an admin. */
   async openDocument(id: string, document: VerificationDocument): Promise<StreamableFile> {
     const request = await this.load(id);
-    const key = document === VerificationDocument.Id ? request.idDocumentKey : request.propertyDocumentKey;
+    const key =
+      document === VerificationDocument.Id ? request.idDocumentKey : request.propertyDocumentKey;
     const object = await this.storage.get(key);
     if (!object) throw AppException.notFound('Document');
     return new StreamableFile(object.body, { type: 'image/jpeg', length: object.size });
@@ -94,7 +114,10 @@ export class VerificationService {
       rejectionReason: null,
     });
     await this.users.setListerVerified(request.userId, now);
-    this.events.emit(UserAdminEvent.ListerVerified, { userId: request.userId, actorId: adminId } satisfies UserModeratedEvent);
+    this.events.emit(UserAdminEvent.ListerVerified, {
+      userId: request.userId,
+      actorId: adminId,
+    } satisfies UserModeratedEvent);
     return this.get(id);
   }
 
@@ -116,7 +139,10 @@ export class VerificationService {
 
   private async storeDocument(userId: string, file: DocumentUpload): Promise<string> {
     if (!IMAGE_TYPES.has(file.mimetype)) {
-      throw AppException.badRequest(ErrorCode.InvalidMedia, 'Upload a clear photo (JPG, PNG, WebP or HEIC) of the document');
+      throw AppException.badRequest(
+        ErrorCode.InvalidMedia,
+        'Upload a clear photo (JPG, PNG, WebP or HEIC) of the document',
+      );
     }
     const key = `private/verification/${userId}/${randomUUID()}.jpg`;
     await this.storage.put(key, await this.images.document(file.buffer), 'image/jpeg');
@@ -132,7 +158,10 @@ export class VerificationService {
   private async loadPending(id: string) {
     const request = await this.load(id);
     if (request.status !== VerificationStatus.Pending) {
-      throw AppException.conflict(ErrorCode.VerificationNotPending, 'This request was already reviewed');
+      throw AppException.conflict(
+        ErrorCode.VerificationNotPending,
+        'This request was already reviewed',
+      );
     }
     return request;
   }

@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, type DeepPartial, type SelectQueryBuilder } from 'typeorm';
-import {
-  ListingSort,
-  ListingStatus,
-  MediaKind,
-  type Paginated,
-} from '@housingcom/contracts';
+import { ListingSort, ListingStatus, MediaKind, type Paginated } from '@housingcom/contracts';
 import { buildPaginationMeta } from '../../../core/utils/pagination.util.js';
 import { ListingMedia } from '../entities/listing-media.entity.js';
 import { Listing } from '../entities/listing.entity.js';
@@ -51,7 +46,9 @@ export class TypeOrmListingsRepository implements ListingsRepository {
   }
 
   findByOwner(ownerId: string, status?: ListingStatus): Promise<ListingRow[]> {
-    const qb = this.baseQuery().where('listing.owner_id = :ownerId', { ownerId }).orderBy('listing.updated_at', 'DESC');
+    const qb = this.baseQuery()
+      .where('listing.owner_id = :ownerId', { ownerId })
+      .orderBy('listing.updated_at', 'DESC');
     if (status) qb.andWhere('listing.status = :status', { status });
     return this.toRows(qb);
   }
@@ -77,7 +74,11 @@ export class TypeOrmListingsRepository implements ListingsRepository {
     return { items, meta: buildPaginationMeta(f.page, f.limit, total) };
   }
 
-  async findByStatus(status: ListingStatus, page: number, limit: number): Promise<Paginated<ListingRow>> {
+  async findByStatus(
+    status: ListingStatus,
+    page: number,
+    limit: number,
+  ): Promise<Paginated<ListingRow>> {
     const qb = this.baseQuery()
       .where('listing.status = :status', { status })
       // Oldest submissions first: a fair review queue.
@@ -135,7 +136,8 @@ export class TypeOrmListingsRepository implements ListingsRepository {
         'cover_key',
       )
       .addSelect(
-        (sub) => sub.select('COUNT(*)').from(ListingMedia, 'mc').where('mc.listing_id = listing.id'),
+        (sub) =>
+          sub.select('COUNT(*)').from(ListingMedia, 'mc').where('mc.listing_id = listing.id'),
         'media_count',
       );
   }

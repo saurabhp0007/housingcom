@@ -11,7 +11,10 @@ import type { AuthUser } from '../../../core/auth/auth-user.js';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ListingEvent, type ListingViewedEvent } from '../../../core/events/domain-events.js';
 import type { BrowseListingsQueryDto } from '../dto/listing-query.dto.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 import { ListingMapper } from '../mappers/listing.mapper.js';
 import { ListingDetailsService } from './listing-details.service.js';
 
@@ -44,7 +47,8 @@ export class ListingsQueryService {
     const row = await this.details.loadRow(id);
     const isOwner = viewer?.id === row.listing.ownerId;
     const privileged = isOwner || !!viewer?.roles.includes(UserRole.Admin);
-    if (row.listing.status !== ListingStatus.Live && !privileged) throw AppException.notFound('Listing');
+    if (row.listing.status !== ListingStatus.Live && !privileged)
+      throw AppException.notFound('Listing');
 
     if (!isOwner && row.listing.status === ListingStatus.Live) {
       this.events.emit(ListingEvent.Viewed, {

@@ -17,4 +17,3 @@ export class VerificationQueueQueryDto {
   @Max(50)
   limit: number = 20;
 }
-

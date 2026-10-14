@@ -16,7 +16,10 @@ export class AdminUsersService {
   async search(q: AdminUsersQueryDto): Promise<Paginated<AdminUserResponse>> {
     const page = await this.users.search(q);
     const counts = await this.listings.countByOwner(page.items.map((u) => u.id));
-    return { items: page.items.map((u) => toAdminUserResponse(u, counts.get(u.id) ?? 0)), meta: page.meta };
+    return {
+      items: page.items.map((u) => toAdminUserResponse(u, counts.get(u.id) ?? 0)),
+      meta: page.meta,
+    };
   }
 
   async setBlocked(adminId: string, userId: string, blocked: boolean): Promise<AdminUserResponse> {

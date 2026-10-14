@@ -30,6 +30,7 @@ export default function ListerOnboardingScreen() {
       dispatch(userUpdated(user));
       toast.show("You're a lister now. Post your first property!");
       router.back();
+      router.push('/lister');
     } catch (e) {
       toast.show(toAppError(e).message);
     }

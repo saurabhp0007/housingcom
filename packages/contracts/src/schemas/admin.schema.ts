@@ -3,7 +3,8 @@ import { UserRole, UserStatus } from '../enums/user.enums.js';
 import { VerificationStatus } from '../enums/verification.enums.js';
 import { ListingStatus } from '../enums/listing.enums.js';
 
-const values = <T extends Record<string, string>>(o: T) => Object.values(o) as [T[keyof T], ...T[keyof T][]];
+const values = <T extends Record<string, string>>(o: T) =>
+  Object.values(o) as [T[keyof T], ...T[keyof T][]];
 
 export const adminListingsQuerySchema = z.object({
   status: z.enum(values(ListingStatus)).default(ListingStatus.PendingApproval),

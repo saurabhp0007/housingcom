@@ -22,7 +22,11 @@ export class AdminDashboardService {
       this.verification.countPending(),
     ]);
     return {
-      users: { total: userCounts.total, listers: userCounts.listers, newLast7Days: userCounts.newSince },
+      users: {
+        total: userCounts.total,
+        listers: userCounts.listers,
+        newLast7Days: userCounts.newSince,
+      },
       listings: {
         live: byStatus[ListingStatus.Live] ?? 0,
         pendingApproval: byStatus[ListingStatus.PendingApproval] ?? 0,

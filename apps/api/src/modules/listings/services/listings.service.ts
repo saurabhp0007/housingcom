@@ -22,12 +22,16 @@ import {
   LISTING_MEDIA_REPOSITORY,
   type ListingMediaRepository,
 } from '../interfaces/listing-media-repository.interface.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 import { ListingMapper } from '../mappers/listing.mapper.js';
 import { transition, type TransitionContext } from '../policies/listing-status.policy.js';
 import { ListingDetailsService } from './listing-details.service.js';
 
-type LifecycleAction = typeof ListingAction.Pause | typeof ListingAction.Resume | typeof ListingAction.MarkFilled;
+type LifecycleAction =
+  typeof ListingAction.Pause | typeof ListingAction.Resume | typeof ListingAction.MarkFilled;
 
 /** Everything a lister does with their own listings. */
 @Injectable()
@@ -74,7 +78,11 @@ export class ListingsService {
    * Called for any content change (fields or photos). Unverified listers' edits to live
    * listings go back to review, so unreviewed content never reaches the public.
    */
-  async applyEdit(listing: Listing, userId: string, columns: DeepPartial<Listing> = {}): Promise<void> {
+  async applyEdit(
+    listing: Listing,
+    userId: string,
+    columns: DeepPartial<Listing> = {},
+  ): Promise<void> {
     const result = transition(listing.status, ListingAction.Edit, await this.listerContext(userId));
     if (!result.allowed) throw this.notAllowed(result.reason);
 
@@ -89,7 +97,11 @@ export class ListingsService {
   /** Validates completeness, then goes live (verified lister) or into the review queue. */
   async submit(userId: string, id: string): Promise<ListingDetailResponse> {
     const listing = await this.assertOwned(userId, id);
-    const result = transition(listing.status, ListingAction.Submit, await this.listerContext(userId));
+    const result = transition(
+      listing.status,
+      ListingAction.Submit,
+      await this.listerContext(userId),
+    );
     if (!result.allowed) throw this.notAllowed(result.reason);
 
     await this.assertComplete(listing);
@@ -102,17 +114,24 @@ export class ListingsService {
       ...(result.next === ListingStatus.Live && !listing.publishedAt ? { publishedAt: now } : {}),
     });
     this.emitStatus(listing, result.next, userId);
-    this.events.emit(result.next === ListingStatus.Live ? ListingEvent.Published : ListingEvent.Submitted, {
-      listingId: id,
-      ownerId: userId,
-      from: listing.status,
-      to: result.next,
-      actorId: userId,
-    } satisfies ListingStatusEvent);
+    this.events.emit(
+      result.next === ListingStatus.Live ? ListingEvent.Published : ListingEvent.Submitted,
+      {
+        listingId: id,
+        ownerId: userId,
+        from: listing.status,
+        to: result.next,
+        actorId: userId,
+      } satisfies ListingStatusEvent,
+    );
     return this.details.forPrivileged(id);
   }
 
-  async changeLifecycle(userId: string, id: string, action: LifecycleAction): Promise<ListingDetailResponse> {
+  async changeLifecycle(
+    userId: string,
+    id: string,
+    action: LifecycleAction,
+  ): Promise<ListingDetailResponse> {
     const listing = await this.assertOwned(userId, id);
     const result = transition(listing.status, action, await this.listerContext(userId));
     if (!result.allowed) throw this.notAllowed(result.reason);
@@ -137,7 +156,10 @@ export class ListingsService {
   private async listerContext(userId: string): Promise<TransitionContext> {
     const user = await this.users.getById(userId);
     if (!user.listerProfile) {
-      throw AppException.forbidden(ErrorCode.NotALister, 'Switch to lister mode to manage listings');
+      throw AppException.forbidden(
+        ErrorCode.NotALister,
+        'Switch to lister mode to manage listings',
+      );
     }
     return { isVerifiedLister: user.listerProfile.isVerified };
   }
@@ -159,15 +181,21 @@ export class ListingsService {
       address: listing.address,
       location: listing.location ? fromPoint(listing.location) : undefined,
     });
-    const missing = parsed.success ? [] : parsed.error.issues.map((i) => i.path.join('.') || 'listing');
+    const missing = parsed.success
+      ? []
+      : parsed.error.issues.map((i) => i.path.join('.') || 'listing');
 
     const images = await this.media.countByKind(listing.id, MediaKind.Image);
     if (images < LISTING_LIMITS.minImagesToSubmit) missing.push('photos');
 
     if (missing.length > 0) {
-      throw AppException.badRequest(ErrorCode.ListingIncomplete, 'Complete the listing before submitting', {
-        missing: [...new Set(missing)],
-      });
+      throw AppException.badRequest(
+        ErrorCode.ListingIncomplete,
+        'Complete the listing before submitting',
+        {
+          missing: [...new Set(missing)],
+        },
+      );
     }
   }
 
@@ -175,7 +203,8 @@ export class ListingsService {
   private async toColumns(dto: UpdateListingDto): Promise<DeepPartial<Listing>> {
     const { location, houseRules, ...rest } = dto;
     const columns: DeepPartial<Listing> = { ...rest };
-    if (houseRules !== undefined) columns.houseRules = houseRules?.trim() ? houseRules.trim() : null;
+    if (houseRules !== undefined)
+      columns.houseRules = houseRules?.trim() ? houseRules.trim() : null;
 
     if (location) {
       const resolved = await this.geo.resolve(location);
@@ -185,7 +214,11 @@ export class ListingsService {
           "We don't operate in this area yet. Move the pin to a supported city.",
         );
       }
-      Object.assign(columns, { location: toPoint(location), areaId: resolved.area.id, cityId: resolved.city.id });
+      Object.assign(columns, {
+        location: toPoint(location),
+        areaId: resolved.area.id,
+        cityId: resolved.city.id,
+      });
     }
     return columns;
   }

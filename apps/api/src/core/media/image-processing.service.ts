@@ -23,10 +23,20 @@ export class ImageProcessingService {
   /** Listing photo: 1600px WebP + 480px thumbnail for cards and map previews. */
   async listingPhoto(input: Buffer): Promise<ProcessedImage> {
     const image = this.open(input);
-    const [main, thumbnail] = await asInvalidMedia(Promise.all([
-      image.clone().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 }).toBuffer({ resolveWithObject: true }),
-      image.clone().resize({ width: 480, height: 480, fit: 'inside', withoutEnlargement: true }).webp({ quality: 72 }).toBuffer(),
-    ]));
+    const [main, thumbnail] = await asInvalidMedia(
+      Promise.all([
+        image
+          .clone()
+          .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer({ resolveWithObject: true }),
+        image
+          .clone()
+          .resize({ width: 480, height: 480, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 72 })
+          .toBuffer(),
+      ]),
+    );
     return { main: main.data, thumbnail, width: main.info.width, height: main.info.height };
   }
 
@@ -55,6 +65,9 @@ export async function asInvalidMedia<T>(work: Promise<T>): Promise<T> {
     return await work;
   } catch (err) {
     if (err instanceof AppException) throw err;
-    throw AppException.badRequest(ErrorCode.InvalidMedia, 'That file could not be read as an image');
+    throw AppException.badRequest(
+      ErrorCode.InvalidMedia,
+      'That file could not be read as an image',
+    );
   }
 }

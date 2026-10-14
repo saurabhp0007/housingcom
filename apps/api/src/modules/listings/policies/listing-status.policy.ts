@@ -6,13 +6,13 @@ export interface TransitionContext {
 }
 
 export type TransitionResult =
-  | { allowed: true; next: ListingStatus }
-  | { allowed: false; reason: string };
+  { allowed: true; next: ListingStatus } | { allowed: false; reason: string };
 
 const S = ListingStatus;
 const A = ListingAction;
 
-const goLiveOrReview = (ctx: TransitionContext) => (ctx.isVerifiedLister ? S.Live : S.PendingApproval);
+const goLiveOrReview = (ctx: TransitionContext) =>
+  ctx.isVerifiedLister ? S.Live : S.PendingApproval;
 
 /**
  * The listing lifecycle as a pure function:
@@ -39,23 +39,32 @@ export function transition(
 
     case A.Edit:
       if (current === S.Filled) return deny('Relist the property before editing it');
-      if ((current === S.Live || current === S.Paused) && !ctx.isVerifiedLister) return to(S.PendingApproval);
+      if ((current === S.Live || current === S.Paused) && !ctx.isVerifiedLister)
+        return to(S.PendingApproval);
       return to(current);
 
     case A.Approve:
-      return current === S.PendingApproval ? to(S.Live) : deny('Only listings awaiting approval can be approved');
+      return current === S.PendingApproval
+        ? to(S.Live)
+        : deny('Only listings awaiting approval can be approved');
 
     case A.Reject:
-      return current === S.PendingApproval ? to(S.Rejected) : deny('Only listings awaiting approval can be rejected');
+      return current === S.PendingApproval
+        ? to(S.Rejected)
+        : deny('Only listings awaiting approval can be rejected');
 
     case A.Pause:
       return current === S.Live ? to(S.Paused) : deny('Only live listings can be paused');
 
     case A.Resume:
-      return current === S.Paused || current === S.Filled ? to(S.Live) : deny('Only paused or filled listings can be resumed');
+      return current === S.Paused || current === S.Filled
+        ? to(S.Live)
+        : deny('Only paused or filled listings can be resumed');
 
     case A.MarkFilled:
-      return current === S.Live || current === S.Paused ? to(S.Filled) : deny('Only live or paused listings can be marked filled');
+      return current === S.Live || current === S.Paused
+        ? to(S.Filled)
+        : deny('Only live or paused listings can be marked filled');
   }
 }
 

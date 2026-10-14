@@ -1,7 +1,10 @@
 import type { VerificationRequestResponse } from '@housingcom/contracts';
 import type { VerificationRequest } from '../entities/verification-request.entity.js';
 
-export function toVerificationResponse(r: VerificationRequest, includeUser = false): VerificationRequestResponse {
+export function toVerificationResponse(
+  r: VerificationRequest,
+  includeUser = false,
+): VerificationRequestResponse {
   return {
     id: r.id,
     status: r.status,

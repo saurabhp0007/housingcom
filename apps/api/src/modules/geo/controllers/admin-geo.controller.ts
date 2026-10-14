@@ -2,8 +2,17 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestj
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@housingcom/contracts';
 import { Roles } from '../../../core/http/decorators/index.js';
-import { CreateAreaDto, CreateCityDto, UpdateAreaDto, UpdateCityDto } from '../dto/admin-geo.dto.js';
-import { GeoAdminService, type AdminAreaResponse, type AdminCityResponse } from '../services/geo-admin.service.js';
+import {
+  CreateAreaDto,
+  CreateCityDto,
+  UpdateAreaDto,
+  UpdateCityDto,
+} from '../dto/admin-geo.dto.js';
+import {
+  GeoAdminService,
+  type AdminAreaResponse,
+  type AdminCityResponse,
+} from '../services/geo-admin.service.js';
 
 @ApiTags('Admin · Cities & areas')
 @ApiBearerAuth()
@@ -23,7 +32,10 @@ export class AdminGeoController {
   }
 
   @Patch('cities/:id')
-  updateCity(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCityDto): Promise<AdminCityResponse> {
+  updateCity(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCityDto,
+  ): Promise<AdminCityResponse> {
     return this.geoAdmin.updateCity(id, dto);
   }
 
@@ -33,12 +45,18 @@ export class AdminGeoController {
   }
 
   @Post('cities/:id/areas')
-  createArea(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateAreaDto): Promise<AdminAreaResponse> {
+  createArea(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateAreaDto,
+  ): Promise<AdminAreaResponse> {
     return this.geoAdmin.createArea(id, dto);
   }
 
   @Patch('areas/:id')
-  updateArea(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateAreaDto): Promise<AdminAreaResponse> {
+  updateArea(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateAreaDto,
+  ): Promise<AdminAreaResponse> {
     return this.geoAdmin.updateArea(id, dto);
   }
 }

@@ -10,7 +10,8 @@ import {
 } from '../enums/listing.enums.js';
 import { coordinatesSchema } from './common.schema.js';
 
-const values = <T extends Record<string, string>>(o: T) => Object.values(o) as [T[keyof T], ...T[keyof T][]];
+const values = <T extends Record<string, string>>(o: T) =>
+  Object.values(o) as [T[keyof T], ...T[keyof T][]];
 
 /**
  * Fields of a listing. Every field is optional while drafting (the editor autosaves);

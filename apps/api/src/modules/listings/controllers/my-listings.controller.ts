@@ -45,17 +45,26 @@ export class MyListingsController {
 
   /** Starts a draft. The editor then saves each step with PATCH. */
   @Post()
-  create(@CurrentUser() user: AuthUser, @Body() dto: CreateListingDto): Promise<ListingDetailResponse> {
+  create(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreateListingDto,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.create(user.id, dto);
   }
 
   @Get()
-  list(@CurrentUser() user: AuthUser, @Query() query: MyListingsQueryDto): Promise<MyListingResponse[]> {
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query() query: MyListingsQueryDto,
+  ): Promise<MyListingResponse[]> {
     return this.listingsService.mine(user.id, query.status);
   }
 
   @Get(':id')
-  get(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  get(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.getOwned(user.id, id);
   }
 
@@ -71,25 +80,37 @@ export class MyListingsController {
   /** Verified listers go live instantly; others enter the approval queue. */
   @Post(':id/submit')
   @HttpCode(HttpStatus.OK)
-  submit(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  submit(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.submit(user.id, id);
   }
 
   @Post(':id/pause')
   @HttpCode(HttpStatus.OK)
-  pause(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  pause(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.changeLifecycle(user.id, id, ListingAction.Pause);
   }
 
   @Post(':id/resume')
   @HttpCode(HttpStatus.OK)
-  resume(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  resume(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.changeLifecycle(user.id, id, ListingAction.Resume);
   }
 
   @Post(':id/mark-filled')
   @HttpCode(HttpStatus.OK)
-  markFilled(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  markFilled(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.listingsService.changeLifecycle(user.id, id, ListingAction.MarkFilled);
   }
 
@@ -109,7 +130,8 @@ export class MyListingsController {
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<ListingMediaResponse> {
-    if (!file) throw AppException.badRequest(ErrorCode.InvalidMedia, 'Attach the photo or video as "file"');
+    if (!file)
+      throw AppException.badRequest(ErrorCode.InvalidMedia, 'Attach the photo or video as "file"');
     return this.mediaService.upload(user.id, id, file);
   }
 

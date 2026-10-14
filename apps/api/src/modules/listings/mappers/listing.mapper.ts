@@ -18,7 +18,14 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export class ListingMapper {
   constructor(private readonly urls: PublicUrlService) {}
 
-  card({ listing: l, areaName, cityName, isVerifiedLister, coverKey, distanceKm }: ListingRow): ListingCardResponse {
+  card({
+    listing: l,
+    areaName,
+    cityName,
+    isVerifiedLister,
+    coverKey,
+    distanceKm,
+  }: ListingRow): ListingCardResponse {
     return {
       id: l.id,
       type: l.type,
@@ -65,7 +72,12 @@ export class ListingMapper {
   }
 
   /** `privileged`: the owner or an admin, who also see moderation fields and stats. */
-  detail(row: ListingRow, media: ListingMedia[], owner: User, privileged: boolean): ListingDetailResponse {
+  detail(
+    row: ListingRow,
+    media: ListingMedia[],
+    owner: User,
+    privileged: boolean,
+  ): ListingDetailResponse {
     const l = row.listing;
     return {
       ...this.card(row),
@@ -87,7 +99,11 @@ export class ListingMapper {
       createdAt: l.createdAt.toISOString(),
       updatedAt: l.updatedAt.toISOString(),
       ...(privileged
-        ? { rejectionReason: l.rejectionReason, viewCount: l.viewCount, contactCount: l.contactCount }
+        ? {
+            rejectionReason: l.rejectionReason,
+            viewCount: l.viewCount,
+            contactCount: l.contactCount,
+          }
         : {}),
     };
   }

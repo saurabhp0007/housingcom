@@ -1,0 +1,103 @@
+import { AppText, HStack, Pill, VStack, useTheme } from '@housingcom/ui';
+import { formatDistance, formatInr } from '@housingcom/utils';
+import type { ListingCardResponse } from '@housingcom/contracts';
+import { Image } from 'expo-image';
+import { SymbolView } from 'expo-symbols';
+import type { ReactNode } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { TYPE_LABELS, listingTagline } from '../listing-labels';
+
+interface ListingCardProps {
+  listing: ListingCardResponse;
+  onPress: () => void;
+  /** Extra content under the card body (status, stats, actions). */
+  footer?: ReactNode;
+  badge?: ReactNode;
+}
+
+/** Image-first card used on Home, search, My listings and admin queues. */
+export function ListingCard({ listing, onPress, footer, badge }: ListingCardProps) {
+  const { colors, radius, spacing } = useTheme();
+  const place = [listing.areaName, listing.cityName].filter(Boolean).join(', ');
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${listing.title}, ${formatInr(listing.rent)} per month, ${place}`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: radius.lg,
+          opacity: pressed ? 0.92 : 1,
+        },
+      ]}
+    >
+      <View>
+        <Image
+          source={listing.coverUrl ? { uri: listing.coverUrl } : undefined}
+          placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
+          contentFit="cover"
+          transition={200}
+          style={[
+            styles.image,
+            {
+              borderTopLeftRadius: radius.lg,
+              borderTopRightRadius: radius.lg,
+              backgroundColor: colors.surfaceMuted,
+            },
+          ]}
+        />
+        <HStack gap="xs" style={styles.overlay}>
+          <Pill label={TYPE_LABELS[listing.type]} tone="primary" />
+          {listing.isVerifiedLister ? <Pill label="Verified" tone="verified" /> : null}
+          {badge}
+        </HStack>
+      </View>
+      <VStack gap="xxs" style={{ padding: spacing.md }}>
+        <HStack justify="space-between" align="center">
+          <AppText variant="heading">
+            {formatInr(listing.rent)}
+            <AppText variant="caption" color="textSecondary">
+              {' '}
+              / month
+            </AppText>
+          </AppText>
+          {listing.distanceKm !== undefined ? (
+            <HStack gap="xxs" align="center">
+              <SymbolView
+                name={{ ios: 'location', android: 'near_me' }}
+                size={12}
+                tintColor={colors.textSecondary}
+              />
+              <AppText variant="caption" color="textSecondary">
+                {formatDistance(listing.distanceKm)}
+              </AppText>
+            </HStack>
+          ) : null}
+        </HStack>
+        <AppText variant="bodyStrong" numberOfLines={1}>
+          {listing.title}
+        </AppText>
+        <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+          {listingTagline(listing)}
+          {listing.foodIncluded ? ' · Food included' : ''}
+        </AppText>
+        {place ? (
+          <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+            {place}
+          </AppText>
+        ) : null}
+        {footer}
+      </VStack>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: { borderWidth: 1, overflow: 'hidden' },
+  image: { width: '100%', aspectRatio: 16 / 10 },
+  overlay: { position: 'absolute', top: 10, left: 10 },
+});

@@ -1,3 +1,4 @@
+import { UserRole } from '@housingcom/contracts';
 import { AppText, Button, ConfirmDialog, HStack, Screen, VStack, useTheme } from '@housingcom/ui';
 import { maskPhone } from '@housingcom/utils';
 import { router } from 'expo-router';
@@ -13,6 +14,7 @@ export default function ProfileScreen() {
   const { colors, radius, spacing } = useTheme();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, isLister } = useSession();
+  const isAdmin = !!user?.roles.includes(UserRole.Admin);
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   return (
@@ -60,6 +62,21 @@ export default function ProfileScreen() {
             </VStack>
           )}
         </View>
+
+        {isLister || isAdmin ? (
+          <VStack gap="sm">
+            {isLister ? (
+              <Button
+                label="Lister dashboard"
+                variant="tonal"
+                onPress={() => router.push('/lister')}
+              />
+            ) : null}
+            {isAdmin ? (
+              <Button label="Admin panel" variant="tonal" onPress={() => router.push('/admin')} />
+            ) : null}
+          </VStack>
+        ) : null}
 
         {isAuthenticated && !isLister ? (
           <View

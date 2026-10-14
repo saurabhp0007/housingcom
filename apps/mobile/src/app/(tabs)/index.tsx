@@ -14,6 +14,8 @@ import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { useSession } from '@/features/auth/hooks/useSession';
+import { ListingCard } from '@/features/listings/components/ListingCard';
+import { useBrowseListingsQuery } from '@/features/listings/listings.api';
 import { LocationPill } from '@/features/location/components/LocationPill';
 import { LocationSheet } from '@/features/location/components/LocationSheet';
 import { useNearbyAreasQuery } from '@/features/location/geo.api';
@@ -33,6 +35,19 @@ export default function HomeScreen() {
     setSheetOpen(false);
     setAutoPromptDismissed(true);
   };
+
+  const { data: listings, isLoading: listingsLoading } = useBrowseListingsQuery(
+    selected
+      ? {
+          lat: selected.coords.lat,
+          lng: selected.coords.lng,
+          radiusKm: 10,
+          sort: 'nearest',
+          limit: 20,
+        }
+      : {},
+    { skip: !selected },
+  );
 
   const { data: nearby, isLoading } = useNearbyAreasQuery(
     selected
@@ -109,11 +124,30 @@ export default function HomeScreen() {
         </VStack>
 
         <VStack gap="md">
-          <AppText variant="heading">Recommended near you</AppText>
-          <EmptyState
-            title="Listings are on the way"
-            description="Rooms, flats and PGs around you will show up here, ranked for you."
-          />
+          <AppText variant="heading">Near you</AppText>
+          {!selected ? null : listingsLoading ? (
+            <VStack gap="lg">
+              <Skeleton height={260} radius="lg" />
+              <Skeleton height={260} radius="lg" />
+            </VStack>
+          ) : listings?.items.length ? (
+            <VStack gap="lg">
+              {listings.items.map((l) => (
+                <ListingCard
+                  key={l.id}
+                  listing={l}
+                  onPress={() => router.push(`/listing/${l.id}`)}
+                />
+              ))}
+            </VStack>
+          ) : (
+            <EmptyState
+              title="No listings here yet"
+              description="Try a nearby area. New rooms, flats and PGs are added every day."
+              actionLabel="Change location"
+              onAction={() => setSheetOpen(true)}
+            />
+          )}
         </VStack>
       </VStack>
 

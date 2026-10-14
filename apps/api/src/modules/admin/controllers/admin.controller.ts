@@ -1,4 +1,13 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   UserRole,
@@ -35,13 +44,19 @@ export class AdminController {
   /** Blocks immediately: sessions revoked and live access tokens rejected. */
   @Post('users/:id/block')
   @HttpCode(HttpStatus.OK)
-  block(@CurrentUser() admin: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<AdminUserResponse> {
+  block(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AdminUserResponse> {
     return this.users.setBlocked(admin.id, id, true);
   }
 
   @Post('users/:id/unblock')
   @HttpCode(HttpStatus.OK)
-  unblock(@CurrentUser() admin: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<AdminUserResponse> {
+  unblock(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AdminUserResponse> {
     return this.users.setBlocked(admin.id, id, false);
   }
 }

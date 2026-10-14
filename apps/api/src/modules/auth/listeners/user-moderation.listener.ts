@@ -16,7 +16,10 @@ export class UserModerationListener {
 
   @OnEvent(UserAdminEvent.Blocked)
   async onBlocked({ userId }: UserModeratedEvent): Promise<void> {
-    await Promise.all([this.sessions.revokeAllForUser(userId, new Date()), this.blocklist.block(userId)]);
+    await Promise.all([
+      this.sessions.revokeAllForUser(userId, new Date()),
+      this.blocklist.block(userId),
+    ]);
   }
 
   @OnEvent(UserAdminEvent.Unblocked)

@@ -29,7 +29,8 @@ export class UsersAdminService {
   }
 
   async setBlocked(adminId: string, userId: string, blocked: boolean): Promise<User> {
-    if (adminId === userId) throw AppException.badRequest(ErrorCode.CannotModerateSelf, "You can't block yourself");
+    if (adminId === userId)
+      throw AppException.badRequest(ErrorCode.CannotModerateSelf, "You can't block yourself");
     const user = await this.users.findById(userId);
     if (!user) throw AppException.notFound('User');
     if (blocked && user.roles.includes(UserRole.Admin)) {

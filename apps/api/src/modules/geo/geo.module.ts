@@ -12,7 +12,11 @@ import { GeoService } from './services/geo.service.js';
 @Module({
   imports: [TypeOrmModule.forFeature([City, Area])],
   controllers: [GeoController, AdminGeoController],
-  providers: [GeoService, GeoAdminService, { provide: GEO_REPOSITORY, useClass: TypeOrmGeoRepository }],
+  providers: [
+    GeoService,
+    GeoAdminService,
+    { provide: GEO_REPOSITORY, useClass: TypeOrmGeoRepository },
+  ],
   exports: [GeoService],
 })
 export class GeoModule {}

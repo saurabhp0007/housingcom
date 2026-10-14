@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ListingStatus } from '@housingcom/contracts';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 
 /** Read-only aggregates other modules (admin dashboard, user management) need. */
 @Injectable()

@@ -1,4 +1,11 @@
-import type { AuthProvider, ListerType, Paginated, Platform, UserRole, UserStatus } from '@housingcom/contracts';
+import type {
+  AuthProvider,
+  ListerType,
+  Paginated,
+  Platform,
+  UserRole,
+  UserStatus,
+} from '@housingcom/contracts';
 import type { User } from '../entities/user.entity.js';
 
 export const USERS_REPOSITORY = Symbol('USERS_REPOSITORY');

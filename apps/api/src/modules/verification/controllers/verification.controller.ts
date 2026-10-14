@@ -36,11 +36,17 @@ export class VerificationController {
       { name: 'propertyProof', maxCount: 1 },
     ]),
   )
-  submit(@CurrentUser() user: AuthUser, @UploadedFiles() files: VerificationFiles): Promise<MyVerificationResponse> {
+  submit(
+    @CurrentUser() user: AuthUser,
+    @UploadedFiles() files: VerificationFiles,
+  ): Promise<MyVerificationResponse> {
     const idProof = files?.idProof?.[0];
     const propertyProof = files?.propertyProof?.[0];
     if (!idProof || !propertyProof) {
-      throw AppException.badRequest(ErrorCode.InvalidMedia, 'Attach both idProof and propertyProof');
+      throw AppException.badRequest(
+        ErrorCode.InvalidMedia,
+        'Attach both idProof and propertyProof',
+      );
     }
     return this.verification.submit(user.id, idProof, propertyProof);
   }

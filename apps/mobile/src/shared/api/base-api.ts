@@ -5,11 +5,10 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import type { ApiResponse, AuthTokensResponse } from '@housingcom/contracts';
+import type { ApiResponse } from '@housingcom/contracts';
 import { env } from '../config/env';
-import { secureStorage } from '../storage/secure-storage';
-import type { RootState } from '../store/types';
-import { sessionCleared, tokensRefreshed } from '../store/session.slice';
+import type { AppDispatch, RootState } from '../store/types';
+import { refreshAccessToken } from './token-refresh';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: env.apiUrl,
@@ -22,7 +21,10 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-/** Unwraps the API's { success, data } envelope so endpoints receive `data` directly. */
+/**
+ * Unwraps the API's { success, data, meta? } envelope. Paginated responses (with `meta`)
+ * become the shared `Paginated<T>` shape ({ items, meta }); everything else is just `data`.
+ */
 const unwrappingBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
@@ -30,30 +32,14 @@ const unwrappingBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 ) => {
   const result = await rawBaseQuery(args, api, extra);
   if (result.data && typeof result.data === 'object' && 'success' in result.data) {
-    return { ...result, data: (result.data as ApiResponse<unknown>).data };
+    const envelope = result.data as ApiResponse<unknown>;
+    return {
+      ...result,
+      data: envelope.meta ? { items: envelope.data, meta: envelope.meta } : envelope.data,
+    };
   }
   return result;
 };
-
-/** One refresh at a time: concurrent 401s wait for the same refresh call. */
-let refreshInFlight: Promise<boolean> | null = null;
-
-async function refreshSession(api: Parameters<BaseQueryFn>[1], extra: object): Promise<boolean> {
-  const refreshToken = await secureStorage.getRefreshToken();
-  if (!refreshToken) return false;
-
-  const result = await unwrappingBaseQuery(
-    { url: '/auth/refresh', method: 'POST', body: { refreshToken } },
-    api,
-    extra,
-  );
-  if (!result.data) return false;
-
-  const tokens = result.data as AuthTokensResponse;
-  await secureStorage.setRefreshToken(tokens.refreshToken);
-  api.dispatch(tokensRefreshed({ accessToken: tokens.accessToken }));
-  return true;
-}
 
 /** Retries a request once after transparently refreshing an expired access token. */
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -65,14 +51,8 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   const isAuthCall = typeof args !== 'string' && args.url.startsWith('/auth/');
 
   if (result.error?.status === 401 && !isAuthCall) {
-    refreshInFlight ??= refreshSession(api, extra as object).finally(() => {
-      refreshInFlight = null;
-    });
-    if (await refreshInFlight) {
+    if (await refreshAccessToken(api.dispatch as AppDispatch)) {
       result = await unwrappingBaseQuery(args, api, extra);
-    } else {
-      await secureStorage.clearRefreshToken();
-      api.dispatch(sessionCleared());
     }
   }
   return result;
@@ -82,6 +62,19 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Me', 'Cities', 'Areas', 'AppConfig'],
+  tagTypes: [
+    'Me',
+    'Cities',
+    'Areas',
+    'AppConfig',
+    'Listing',
+    'MyListings',
+    'Verification',
+    'AdminQueue',
+    'AdminVerifications',
+    'AdminUsers',
+    'AdminDashboard',
+    'AdminGeo',
+  ],
   endpoints: () => ({}),
 });

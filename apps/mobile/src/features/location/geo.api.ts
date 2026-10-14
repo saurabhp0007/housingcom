@@ -31,5 +31,6 @@ export const {
   useCitiesQuery,
   useCityAreasQuery,
   useNearbyAreasQuery,
+  useResolveLocationQuery,
   useLazyResolveLocationQuery,
 } = geoApi;

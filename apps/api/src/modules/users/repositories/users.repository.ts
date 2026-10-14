@@ -112,6 +112,10 @@ export class TypeOrmUsersRepository implements UsersRepository {
       .addSelect('COUNT(*) FILTER (WHERE user.created_at >= :since)', 'new_since')
       .setParameters({ lister: UserRole.Lister, since })
       .getRawOne<{ total: string; listers: string; new_since: string }>();
-    return { total: Number(row?.total ?? 0), listers: Number(row?.listers ?? 0), newSince: Number(row?.new_since ?? 0) };
+    return {
+      total: Number(row?.total ?? 0),
+      listers: Number(row?.listers ?? 0),
+      newSince: Number(row?.new_since ?? 0),
+    };
   }
 }

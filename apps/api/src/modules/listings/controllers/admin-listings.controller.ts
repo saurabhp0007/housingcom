@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   UserRole,
@@ -31,7 +41,10 @@ export class AdminListingsController {
 
   @Post(':id/approve')
   @HttpCode(HttpStatus.OK)
-  approve(@CurrentUser() admin: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<ListingDetailResponse> {
+  approve(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingDetailResponse> {
     return this.moderation.approve(admin.id, id);
   }
 

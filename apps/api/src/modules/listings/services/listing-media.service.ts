@@ -4,7 +4,10 @@ import { LISTING_LIMITS, MediaKind, type ListingMediaResponse } from '@housingco
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
 import { ImageProcessingService } from '../../../core/media/image-processing.service.js';
-import { OBJECT_STORAGE, type ObjectStorage } from '../../../core/storage/object-storage.interface.js';
+import {
+  OBJECT_STORAGE,
+  type ObjectStorage,
+} from '../../../core/storage/object-storage.interface.js';
 import {
   LISTING_MEDIA_REPOSITORY,
   type ListingMediaRepository,
@@ -37,7 +40,11 @@ export class ListingMediaService {
     private readonly mapper: ListingMapper,
   ) {}
 
-  async upload(userId: string, listingId: string, file: UploadedFile): Promise<ListingMediaResponse> {
+  async upload(
+    userId: string,
+    listingId: string,
+    file: UploadedFile,
+  ): Promise<ListingMediaResponse> {
     const listing = await this.listings.assertOwned(userId, listingId);
     const kind = this.kindOf(file);
     await this.assertWithinLimits(listingId, kind, file.size);
@@ -88,11 +95,18 @@ export class ListingMediaService {
     await this.listings.applyEdit(listing, userId);
     // Storage cleanup is best-effort; an orphaned object is harmless.
     for (const key of [item.storageKey, item.thumbnailKey]) {
-      if (key) await this.storage.delete(key).catch((err) => this.logger.warn({ err, key }, 'Media delete failed'));
+      if (key)
+        await this.storage
+          .delete(key)
+          .catch((err) => this.logger.warn({ err, key }, 'Media delete failed'));
     }
   }
 
-  async reorder(userId: string, listingId: string, mediaIds: string[]): Promise<ListingMediaResponse[]> {
+  async reorder(
+    userId: string,
+    listingId: string,
+    mediaIds: string[],
+  ): Promise<ListingMediaResponse[]> {
     await this.listings.assertOwned(userId, listingId);
     const existing = await this.media.list(listingId);
     const sameSet =
@@ -111,10 +125,15 @@ export class ListingMediaService {
     throw this.invalid('Upload a JPG, PNG, WebP or HEIC photo, or an MP4/MOV video');
   }
 
-  private async assertWithinLimits(listingId: string, kind: MediaKind, size: number): Promise<void> {
+  private async assertWithinLimits(
+    listingId: string,
+    kind: MediaKind,
+    size: number,
+  ): Promise<void> {
     const isImage = kind === MediaKind.Image;
     const maxBytes = isImage ? LISTING_LIMITS.maxImageBytes : LISTING_LIMITS.maxVideoBytes;
-    if (size > maxBytes) throw this.invalid(`File is too large (max ${Math.round(maxBytes / 1048576)} MB)`);
+    if (size > maxBytes)
+      throw this.invalid(`File is too large (max ${Math.round(maxBytes / 1048576)} MB)`);
 
     const max = isImage ? LISTING_LIMITS.maxImages : LISTING_LIMITS.maxVideos;
     if ((await this.media.countByKind(listingId, kind)) >= max) {

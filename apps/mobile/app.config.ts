@@ -100,6 +100,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['expo-notifications', { color: '#4F46E5' }],
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Choose photos of your property to add to your listing.',
+        cameraPermission: 'Take photos of your property and your verification documents.',
+      },
+    ],
+    'expo-video',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     [

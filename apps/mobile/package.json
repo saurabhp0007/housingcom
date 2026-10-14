@@ -25,6 +25,7 @@
     "expo-font": "~57.0.4",
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
+    "expo-image-picker": "~57.0.20",
     "expo-insights": "~57.0.21",
     "expo-linking": "~57.0.12",
     "expo-location": "~57.0.21",
@@ -36,10 +37,12 @@
     "expo-symbols": "~57.0.3",
     "expo-system-ui": "~57.0.4",
     "expo-updates": "~57.0.26",
+    "expo-video": "~57.0.5",
     "expo-web-browser": "~57.0.3",
     "react": "19.2.3",
     "react-hook-form": "^7.90.0",
     "react-native": "0.86.3",
+    "react-native-drawer-layout": "^4.2.12",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-keyboard-controller": "1.21.9",
     "react-native-maps": "1.27.2",
@@ -51,11 +54,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
-    "typescript": "~6.0.3",
-    "@types/node": "^24.0.0"
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",

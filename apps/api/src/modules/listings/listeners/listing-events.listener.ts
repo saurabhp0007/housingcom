@@ -5,7 +5,10 @@ import {
   type ListingStatusEvent,
   type ListingViewedEvent,
 } from '../../../core/events/domain-events.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 
 /**
  * Side effects of listing events. View counting happens off the request path.
@@ -19,7 +22,9 @@ export class ListingEventsListener {
 
   @OnEvent(ListingEvent.Viewed, { async: true })
   async onViewed(event: ListingViewedEvent): Promise<void> {
-    await this.listings.incrementViews(event.listingId).catch((err) => this.logger.warn({ err }, 'View count failed'));
+    await this.listings
+      .incrementViews(event.listingId)
+      .catch((err) => this.logger.warn({ err }, 'View count failed'));
   }
 
   @OnEvent(ListingEvent.StatusChanged, { async: true })

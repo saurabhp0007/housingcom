@@ -16,7 +16,10 @@ import { VerificationService } from './services/verification.service.js';
     UsersModule,
   ],
   controllers: [VerificationController, AdminVerificationsController],
-  providers: [VerificationService, { provide: VERIFICATION_REPOSITORY, useClass: TypeOrmVerificationRepository }],
+  providers: [
+    VerificationService,
+    { provide: VERIFICATION_REPOSITORY, useClass: TypeOrmVerificationRepository },
+  ],
   exports: [VerificationService],
 })
 export class VerificationModule {}

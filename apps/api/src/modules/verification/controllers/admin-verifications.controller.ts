@@ -53,7 +53,10 @@ export class AdminVerificationsController {
 
   @Post(':id/approve')
   @HttpCode(HttpStatus.OK)
-  approve(@CurrentUser() admin: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<VerificationRequestResponse> {
+  approve(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<VerificationRequestResponse> {
     return this.verification.approve(admin.id, id);
   }
 

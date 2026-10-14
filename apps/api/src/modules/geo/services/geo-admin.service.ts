@@ -1,6 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { slugify } from '@housingcom/utils';
-import type { AreaResponse, CityResponse, UpsertAreaInput, UpsertCityInput } from '@housingcom/contracts';
+import type {
+  AreaResponse,
+  CityResponse,
+  UpsertAreaInput,
+  UpsertCityInput,
+} from '@housingcom/contracts';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { CacheService } from '../../../core/redis/cache.service.js';
 import { GEO_REPOSITORY, type GeoRepository } from '../interfaces/geo-repository.interface.js';
@@ -24,12 +29,18 @@ export class GeoAdminService {
   ) {}
 
   async cities(): Promise<AdminCityResponse[]> {
-    return (await this.geo.findAllCities()).map((c) => ({ ...toCityResponse(c), isActive: c.isActive }));
+    return (await this.geo.findAllCities()).map((c) => ({
+      ...toCityResponse(c),
+      isActive: c.isActive,
+    }));
   }
 
   async areas(cityId: string): Promise<AdminAreaResponse[]> {
     await this.city(cityId);
-    return (await this.geo.findAllAreasByCity(cityId)).map((a) => ({ ...toAreaResponse(a), isActive: a.isActive }));
+    return (await this.geo.findAllAreasByCity(cityId)).map((a) => ({
+      ...toAreaResponse(a),
+      isActive: a.isActive,
+    }));
   }
 
   async createCity(input: UpsertCityInput): Promise<AdminCityResponse> {
@@ -49,7 +60,9 @@ export class GeoAdminService {
     await this.geo.updateCity(id, {
       ...(input.name ? { name: input.name, slug: slugify(input.name) } : {}),
       ...(input.state ? { state: input.state } : {}),
-      ...(input.lat !== undefined && input.lng !== undefined ? { center: { lat: input.lat, lng: input.lng } } : {}),
+      ...(input.lat !== undefined && input.lng !== undefined
+        ? { center: { lat: input.lat, lng: input.lng } }
+        : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     });
     await this.cache.del(CITIES_CACHE_KEY);
@@ -73,7 +86,9 @@ export class GeoAdminService {
     if (!(await this.geo.findArea(id))) throw AppException.notFound('Area');
     await this.geo.updateArea(id, {
       ...(input.name ? { name: input.name, slug: slugify(input.name) } : {}),
-      ...(input.lat !== undefined && input.lng !== undefined ? { center: { lat: input.lat, lng: input.lng } } : {}),
+      ...(input.lat !== undefined && input.lng !== undefined
+        ? { center: { lat: input.lat, lng: input.lng } }
+        : {}),
       ...(input.isPopular !== undefined ? { isPopular: input.isPopular } : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     });

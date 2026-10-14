@@ -37,7 +37,10 @@ export class AccessTokenGuard implements CanActivate {
     }
 
     if (await this.blocklist.isBlocked(payload.sub)) {
-      throw AppException.forbidden(ErrorCode.UserBlocked, 'This account has been blocked. Contact support.');
+      throw AppException.forbidden(
+        ErrorCode.UserBlocked,
+        'This account has been blocked. Contact support.',
+      );
     }
     request.user = { id: payload.sub, roles: payload.roles };
     return true;
