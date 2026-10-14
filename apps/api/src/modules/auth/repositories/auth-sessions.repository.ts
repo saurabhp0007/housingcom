@@ -34,4 +34,8 @@ export class TypeOrmAuthSessionsRepository implements AuthSessionsRepository {
   async revokeForDevice(userId: string, deviceId: string, now: Date): Promise<void> {
     await this.sessions.update({ userId, deviceId, revokedAt: IsNull() }, { revokedAt: now });
   }
+
+  async revokeAllForUser(userId: string, now: Date): Promise<void> {
+    await this.sessions.update({ userId, revokedAt: IsNull() }, { revokedAt: now });
+  }
 }

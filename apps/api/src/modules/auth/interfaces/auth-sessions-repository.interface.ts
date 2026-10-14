@@ -18,4 +18,5 @@ export interface AuthSessionsRepository {
   revokeByHash(refreshTokenHash: string, now: Date): Promise<void>;
   /** One session per device: logging in again on the same device replaces the old session. */
   revokeForDevice(userId: string, deviceId: string, now: Date): Promise<void>;
+  revokeAllForUser(userId: string, now: Date): Promise<void>;
 }

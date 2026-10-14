@@ -16,6 +16,7 @@ const MIME_BY_EXT: Record<string, string> = {
   mp3: 'audio/mpeg',
   wav: 'audio/wav',
   mp4: 'video/mp4',
+  mov: 'video/quicktime',
   lottie: 'application/json',
 };
 

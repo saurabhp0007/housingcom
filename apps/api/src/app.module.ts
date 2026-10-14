@@ -12,14 +12,18 @@ import { buildDataSourceOptions } from './core/database/data-source.options.js';
 import { AllExceptionsFilter } from './core/http/filters/all-exceptions.filter.js';
 import { ResponseInterceptor } from './core/http/interceptors/response.interceptor.js';
 import { parseRedisUrl } from './core/redis/redis.constants.js';
+import { MediaModule } from './core/media/media.module.js';
 import { RedisModule } from './core/redis/redis.module.js';
 import { StorageModule } from './core/storage/storage.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
 import { AppConfigModule } from './modules/app-config/app-config.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { ListingsModule } from './modules/listings/listings.module.js';
 import { OtaModule } from './modules/ota/ota.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { VerificationModule } from './modules/verification/verification.module.js';
 
 @Module({
   imports: [
@@ -62,6 +66,7 @@ import { UsersModule } from './modules/users/users.module.js';
     }),
     RedisModule,
     StorageModule,
+    MediaModule,
 
     // ── Features ────────────────────────────────────────────────
     HealthModule,
@@ -70,6 +75,9 @@ import { UsersModule } from './modules/users/users.module.js';
     GeoModule,
     AppConfigModule,
     OtaModule,
+    ListingsModule,
+    VerificationModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

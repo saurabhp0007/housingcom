@@ -13,7 +13,9 @@ import { RolesGuard } from './guards/roles.guard.js';
 import { AUTH_SESSIONS_REPOSITORY } from './interfaces/auth-sessions-repository.interface.js';
 import { IDENTITY_VERIFIER } from './interfaces/identity-verifier.interface.js';
 import { TypeOrmAuthSessionsRepository } from './repositories/auth-sessions.repository.js';
+import { UserModerationListener } from './listeners/user-moderation.listener.js';
 import { AuthService } from './services/auth.service.js';
+import { UserBlocklistService } from './services/user-blocklist.service.js';
 import { TokenService } from './services/token.service.js';
 
 @Module({
@@ -32,6 +34,8 @@ import { TokenService } from './services/token.service.js';
   providers: [
     AuthService,
     TokenService,
+    UserBlocklistService,
+    UserModerationListener,
     { provide: IDENTITY_VERIFIER, useClass: FirebaseIdentityVerifier },
     { provide: AUTH_SESSIONS_REPOSITORY, useClass: TypeOrmAuthSessionsRepository },
     // Order matters: authenticate first, then authorize.

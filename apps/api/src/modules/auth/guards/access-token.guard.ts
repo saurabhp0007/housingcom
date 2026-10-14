@@ -2,8 +2,10 @@ import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/com
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AppException } from '../../../core/errors/app.exception.js';
+import { ErrorCode } from '../../../core/errors/error-codes.js';
 import { IS_OPTIONAL_AUTH_KEY, IS_PUBLIC_KEY } from '../../../core/http/decorators/index.js';
 import { TokenService } from '../services/token.service.js';
+import { UserBlocklistService } from '../services/user-blocklist.service.js';
 
 /** Global guard: every route requires a valid access token unless marked @Public / @OptionalAuth. */
 @Injectable()
@@ -11,6 +13,7 @@ export class AccessTokenGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly tokens: TokenService,
+    private readonly blocklist: UserBlocklistService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,14 +28,19 @@ export class AccessTokenGuard implements CanActivate {
       throw AppException.unauthorized();
     }
 
+    let payload;
     try {
-      const payload = await this.tokens.verifyAccessToken(token);
-      request.user = { id: payload.sub, roles: payload.roles };
-      return true;
+      payload = await this.tokens.verifyAccessToken(token);
     } catch {
       if (optional) return true;
       throw AppException.unauthorized();
     }
+
+    if (await this.blocklist.isBlocked(payload.sub)) {
+      throw AppException.forbidden(ErrorCode.UserBlocked, 'This account has been blocked. Contact support.');
+    }
+    request.user = { id: payload.sub, roles: payload.roles };
+    return true;
   }
 
   private extractBearer(request: Request): string | null {

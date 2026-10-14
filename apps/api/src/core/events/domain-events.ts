@@ -42,3 +42,39 @@ export interface OtaUpdateAutoPausedEvent {
   crashCount: number;
   crashRate: number;
 }
+
+export const ListingEvent = {
+  Submitted: 'listing.submitted',
+  Published: 'listing.published',
+  Approved: 'listing.approved',
+  Rejected: 'listing.rejected',
+  StatusChanged: 'listing.status_changed',
+  Viewed: 'listing.viewed',
+} as const;
+
+export interface ListingStatusEvent {
+  listingId: string;
+  ownerId: string;
+  from: string;
+  to: string;
+  actorId: string;
+  reason?: string;
+}
+
+export interface ListingViewedEvent {
+  listingId: string;
+  viewerId: string | null;
+}
+
+export const UserAdminEvent = {
+  Blocked: 'user.blocked',
+  Unblocked: 'user.unblocked',
+  ListerVerified: 'lister.verified',
+  ListerVerificationRejected: 'lister.verification_rejected',
+} as const;
+
+export interface UserModeratedEvent {
+  userId: string;
+  actorId: string;
+  reason?: string;
+}

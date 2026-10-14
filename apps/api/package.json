@@ -15,7 +15,8 @@
     "migration:generate": "nest build && typeorm -d dist/core/database/data-source.js migration:generate",
     "migration:run": "nest build && typeorm -d dist/core/database/data-source.js migration:run",
     "migration:revert": "nest build && typeorm -d dist/core/database/data-source.js migration:revert",
-    "seed": "nest build && node dist/core/database/seeds/run-seeds.js"
+    "seed": "nest build && node dist/core/database/seeds/run-seeds.js",
+    "make-admin": "nest build && node dist/core/database/seeds/make-admin.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1151.0",
@@ -44,6 +45,7 @@
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "sharp": "^0.35.5",
     "typeorm": "^1.1.2",
     "zod": "^4.6.7"
   },

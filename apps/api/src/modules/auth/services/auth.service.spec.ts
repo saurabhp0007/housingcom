@@ -68,6 +68,9 @@ class FakeSessions implements AuthSessionsRepository {
       .filter((r) => r.userId === userId && r.deviceId === deviceId)
       .forEach((r) => (r.revokedAt = now));
   }
+  async revokeAllForUser(userId: string, now: Date) {
+    this.rows.filter((r) => r.userId === userId).forEach((r) => (r.revokedAt = now));
+  }
 }
 
 function setup(user = makeUser()) {

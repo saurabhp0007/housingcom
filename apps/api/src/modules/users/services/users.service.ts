@@ -79,4 +79,8 @@ export class UsersService {
   registerDevice(data: UpsertDeviceData): Promise<void> {
     return this.users.upsertDevice(data);
   }
+
+  setListerVerified(userId: string, verifiedAt: Date | null): Promise<void> {
+    return this.users.setListerVerified(userId, verifiedAt);
+  }
 }

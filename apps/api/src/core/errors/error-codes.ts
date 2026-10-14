@@ -13,6 +13,19 @@ export const ErrorCode = {
   UserBlocked: 'AUTH_USER_BLOCKED',
 
   AlreadyLister: 'USER_ALREADY_LISTER',
+  NotALister: 'USER_NOT_A_LISTER',
+  CannotModerateSelf: 'USER_CANNOT_MODERATE_SELF',
+
+  InvalidMedia: 'MEDIA_INVALID',
+  MediaLimitReached: 'MEDIA_LIMIT_REACHED',
+
+  ListingIncomplete: 'LISTING_INCOMPLETE',
+  ListingTransitionNotAllowed: 'LISTING_TRANSITION_NOT_ALLOWED',
+  LocationNotServiceable: 'LISTING_LOCATION_NOT_SERVICEABLE',
+
+  VerificationAlreadyPending: 'VERIFICATION_ALREADY_PENDING',
+  AlreadyVerified: 'VERIFICATION_ALREADY_VERIFIED',
+  VerificationNotPending: 'VERIFICATION_NOT_PENDING',
 
   OtaInvalidBundle: 'OTA_INVALID_BUNDLE',
   OtaSigningUnavailable: 'OTA_SIGNING_UNAVAILABLE',

@@ -1,4 +1,4 @@
-import type { AuthProvider, ListerType, Platform, UserRole } from '@housingcom/contracts';
+import type { AuthProvider, ListerType, Paginated, Platform, UserRole, UserStatus } from '@housingcom/contracts';
 import type { User } from '../entities/user.entity.js';
 
 export const USERS_REPOSITORY = Symbol('USERS_REPOSITORY');
@@ -19,6 +19,20 @@ export interface UpsertDeviceData {
   pushToken?: string | null;
 }
 
+export interface UserSearchFilter {
+  q?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  page: number;
+  limit: number;
+}
+
+export interface UserCounts {
+  total: number;
+  listers: number;
+  newSince: number;
+}
+
 export interface UsersRepository {
   /** Loads the user with their lister profile. */
   findById(id: string): Promise<User | null>;
@@ -37,4 +51,8 @@ export interface UsersRepository {
     roles: UserRole[],
   ): Promise<void>;
   upsertDevice(data: UpsertDeviceData): Promise<void>;
+  setListerVerified(userId: string, verifiedAt: Date | null): Promise<void>;
+  setStatus(id: string, status: UserStatus): Promise<void>;
+  search(filter: UserSearchFilter): Promise<Paginated<User>>;
+  counts(since: Date): Promise<UserCounts>;
 }

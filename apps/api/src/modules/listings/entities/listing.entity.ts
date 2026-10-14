@@ -1,0 +1,120 @@
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  type Point,
+  type Relation,
+} from 'typeorm';
+import {
+  ListingStatus,
+  type Amenity,
+  type FurnishingType,
+  type GenderPreference,
+  type ListingType,
+  type SharingType,
+} from '@housingcom/contracts';
+import { BaseEntity } from '../../../core/database/base.entity.js';
+import { Area } from '../../geo/entities/area.entity.js';
+import { City } from '../../geo/entities/city.entity.js';
+import { User } from '../../users/entities/user.entity.js';
+import { ListingMedia } from './listing-media.entity.js';
+
+/** A room, flat or PG. Fields stay nullable while it is a draft; submission enforces completeness. */
+@Entity('listings')
+@Index(['status', 'publishedAt'])
+export class Listing extends BaseEntity {
+  @Index()
+  @Column('uuid')
+  ownerId: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'owner_id' })
+  owner?: Relation<User>;
+
+  @Column({ type: 'varchar', length: 8 })
+  type: ListingType;
+
+  @Column({ type: 'varchar', length: 24, default: ListingStatus.Draft })
+  status: ListingStatus;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  title: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ type: 'integer', nullable: true })
+  rent: number | null;
+
+  @Column({ type: 'integer', nullable: true })
+  deposit: number | null;
+
+  @Column({ type: 'varchar', length: 8, nullable: true })
+  sharing: SharingType | null;
+
+  @Column({ type: 'varchar', length: 12, nullable: true })
+  gender: GenderPreference | null;
+
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  furnishing: FurnishingType | null;
+
+  @Column({ type: 'boolean', default: false })
+  foodIncluded: boolean;
+
+  @Column({ type: 'text', array: true, default: () => `'{}'` })
+  amenities: Amenity[];
+
+  @Column({ type: 'text', nullable: true })
+  houseRules: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  availableFrom: string | null;
+
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  address: string | null;
+
+  @Index({ spatial: true })
+  @Column({ type: 'geography', spatialFeatureType: 'Point', srid: 4326, nullable: true })
+  location: Point | null;
+
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  areaId: string | null;
+
+  @ManyToOne(() => Area, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'area_id' })
+  area?: Relation<Area> | null;
+
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  cityId: string | null;
+
+  @ManyToOne(() => City, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'city_id' })
+  city?: Relation<City> | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  rejectionReason: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  publishedAt: Date | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  submittedAt: Date | null;
+
+  @Column({ type: 'integer', default: 0 })
+  viewCount: number;
+
+  @Column({ type: 'integer', default: 0 })
+  contactCount: number;
+
+  @OneToMany(() => ListingMedia, (m) => m.listing)
+  media?: Relation<ListingMedia>[];
+
+  @DeleteDateColumn({ type: 'timestamptz' })
+  deletedAt: Date | null;
+}

@@ -4,7 +4,13 @@ import { Repository } from 'typeorm';
 import type { Coordinates } from '@housingcom/contracts';
 import { Area } from '../entities/area.entity.js';
 import { City } from '../entities/city.entity.js';
-import type { AreaWithDistance, GeoRepository } from '../interfaces/geo-repository.interface.js';
+import { toPoint } from '../../../core/utils/geo.util.js';
+import type {
+  AreaData,
+  AreaWithDistance,
+  CityData,
+  GeoRepository,
+} from '../interfaces/geo-repository.interface.js';
 
 @Injectable()
 export class TypeOrmGeoRepository implements GeoRepository {
@@ -49,5 +55,37 @@ export class TypeOrmGeoRepository implements GeoRepository {
       area,
       distanceKm: Number(raw[i]?.distance_m ?? 0) / 1000,
     }));
+  }
+
+  findAllCities(): Promise<City[]> {
+    return this.cities.find({ order: { name: 'ASC' } });
+  }
+
+  findAnyCity(id: string): Promise<City | null> {
+    return this.cities.findOneBy({ id });
+  }
+
+  findAllAreasByCity(cityId: string): Promise<Area[]> {
+    return this.areas.find({ where: { cityId }, order: { name: 'ASC' } });
+  }
+
+  findArea(id: string): Promise<Area | null> {
+    return this.areas.findOneBy({ id });
+  }
+
+  createCity({ center, ...rest }: CityData): Promise<City> {
+    return this.cities.save(this.cities.create({ ...rest, center: toPoint(center) }));
+  }
+
+  async updateCity(id: string, { center, ...rest }: Partial<CityData>): Promise<void> {
+    await this.cities.update({ id }, { ...rest, ...(center ? { center: toPoint(center) } : {}) });
+  }
+
+  createArea(cityId: string, { center, ...rest }: AreaData): Promise<Area> {
+    return this.areas.save(this.areas.create({ ...rest, cityId, center: toPoint(center) }));
+  }
+
+  async updateArea(id: string, { center, ...rest }: Partial<AreaData>): Promise<void> {
+    await this.areas.update({ id }, { ...rest, ...(center ? { center: toPoint(center) } : {}) });
   }
 }

@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import type { ListerType, UserRole } from '@housingcom/contracts';
+import { Brackets, DataSource, Repository } from 'typeorm';
+import { UserRole, type ListerType, type Paginated, type UserStatus } from '@housingcom/contracts';
+import { buildPaginationMeta } from '../../../core/utils/pagination.util.js';
 import { ListerProfile } from '../entities/lister-profile.entity.js';
 import { UserDevice } from '../entities/user-device.entity.js';
 import { User } from '../entities/user.entity.js';
 import type {
   CreateUserData,
   UpsertDeviceData,
+  UserCounts,
+  UserSearchFilter,
   UsersRepository,
 } from '../interfaces/users-repository.interface.js';
 
@@ -65,5 +68,50 @@ export class TypeOrmUsersRepository implements UsersRepository {
       },
       { conflictPaths: ['userId', 'deviceId'] },
     );
+  }
+
+  async setListerVerified(userId: string, verifiedAt: Date | null): Promise<void> {
+    await this.dataSource
+      .getRepository(ListerProfile)
+      .update({ userId }, { isVerified: verifiedAt !== null, verifiedAt });
+  }
+
+  async setStatus(id: string, status: UserStatus): Promise<void> {
+    await this.users.update({ id }, { status });
+  }
+
+  async search({ q, role, status, page, limit }: UserSearchFilter): Promise<Paginated<User>> {
+    const qb = this.users
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.listerProfile', 'listerProfile')
+      .orderBy('user.created_at', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+    if (role) qb.andWhere(':role = ANY(user.roles)', { role });
+    if (status) qb.andWhere('user.status = :status', { status });
+    if (q) {
+      const like = `%${q.replace(/[%_\\]/g, '\\$&')}%`;
+      qb.andWhere(
+        new Brackets((w) =>
+          w
+            .where('user.full_name ILIKE :like', { like })
+            .orWhere('user.phone ILIKE :like', { like })
+            .orWhere('user.email ILIKE :like', { like }),
+        ),
+      );
+    }
+    const [items, total] = await qb.getManyAndCount();
+    return { items, meta: buildPaginationMeta(page, limit, total) };
+  }
+
+  async counts(since: Date): Promise<UserCounts> {
+    const row = await this.users
+      .createQueryBuilder('user')
+      .select('COUNT(*)', 'total')
+      .addSelect(`COUNT(*) FILTER (WHERE :lister = ANY(user.roles))`, 'listers')
+      .addSelect('COUNT(*) FILTER (WHERE user.created_at >= :since)', 'new_since')
+      .setParameters({ lister: UserRole.Lister, since })
+      .getRawOne<{ total: string; listers: string; new_since: string }>();
+    return { total: Number(row?.total ?? 0), listers: Number(row?.listers ?? 0), newSince: Number(row?.new_since ?? 0) };
   }
 }

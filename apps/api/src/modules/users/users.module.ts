@@ -7,6 +7,7 @@ import { User } from './entities/user.entity.js';
 import { USERS_REPOSITORY } from './interfaces/users-repository.interface.js';
 import { UserEventsListener } from './listeners/user-events.listener.js';
 import { TypeOrmUsersRepository } from './repositories/users.repository.js';
+import { UsersAdminService } from './services/users-admin.service.js';
 import { UsersService } from './services/users.service.js';
 
 @Module({
@@ -14,9 +15,10 @@ import { UsersService } from './services/users.service.js';
   controllers: [UsersController],
   providers: [
     UsersService,
+    UsersAdminService,
     UserEventsListener,
     { provide: USERS_REPOSITORY, useClass: TypeOrmUsersRepository },
   ],
-  exports: [UsersService],
+  exports: [UsersService, UsersAdminService],
 })
 export class UsersModule {}

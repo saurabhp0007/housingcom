@@ -28,3 +28,86 @@ export const ListingStatus = {
   Filled: 'filled',
 } as const;
 export type ListingStatus = (typeof ListingStatus)[keyof typeof ListingStatus];
+
+export const FurnishingType = {
+  Furnished: 'furnished',
+  SemiFurnished: 'semi_furnished',
+  Unfurnished: 'unfurnished',
+} as const;
+export type FurnishingType = (typeof FurnishingType)[keyof typeof FurnishingType];
+
+export const MediaKind = {
+  Image: 'image',
+  Video: 'video',
+} as const;
+export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind];
+
+/** Actions a lister or admin can take on a listing (see the API's listing status policy). */
+export const ListingAction = {
+  Submit: 'submit',
+  Edit: 'edit',
+  Approve: 'approve',
+  Reject: 'reject',
+  Pause: 'pause',
+  Resume: 'resume',
+  MarkFilled: 'mark_filled',
+} as const;
+export type ListingAction = (typeof ListingAction)[keyof typeof ListingAction];
+
+export const ListingSort = {
+  Newest: 'newest',
+  Nearest: 'nearest',
+} as const;
+export type ListingSort = (typeof ListingSort)[keyof typeof ListingSort];
+
+export const Amenity = {
+  Wifi: 'wifi',
+  Ac: 'ac',
+  Parking: 'parking',
+  Laundry: 'laundry',
+  PowerBackup: 'power_backup',
+  Housekeeping: 'housekeeping',
+  Tv: 'tv',
+  Fridge: 'fridge',
+  WashingMachine: 'washing_machine',
+  Geyser: 'geyser',
+  Gym: 'gym',
+  Lift: 'lift',
+  Security: 'security',
+  Cctv: 'cctv',
+  AttachedBathroom: 'attached_bathroom',
+  Balcony: 'balcony',
+  Kitchen: 'kitchen',
+  WaterPurifier: 'water_purifier',
+} as const;
+export type Amenity = (typeof Amenity)[keyof typeof Amenity];
+
+/** Display labels shared by the app and admin screens. */
+export const AMENITY_LABELS: Record<Amenity, string> = {
+  wifi: 'Wi-Fi',
+  ac: 'AC',
+  parking: 'Parking',
+  laundry: 'Laundry',
+  power_backup: 'Power backup',
+  housekeeping: 'Housekeeping',
+  tv: 'TV',
+  fridge: 'Fridge',
+  washing_machine: 'Washing machine',
+  geyser: 'Geyser',
+  gym: 'Gym',
+  lift: 'Lift',
+  security: 'Security',
+  cctv: 'CCTV',
+  attached_bathroom: 'Attached bathroom',
+  balcony: 'Balcony',
+  kitchen: 'Kitchen',
+  water_purifier: 'RO water',
+};
+
+export const LISTING_LIMITS = {
+  maxImages: 15,
+  maxVideos: 1,
+  minImagesToSubmit: 1,
+  maxImageBytes: 15 * 1024 * 1024,
+  maxVideoBytes: 60 * 1024 * 1024,
+} as const;

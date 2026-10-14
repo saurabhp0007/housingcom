@@ -12,7 +12,7 @@ import { CacheService } from '../../../core/redis/cache.service.js';
 import { GEO_REPOSITORY, type GeoRepository } from '../interfaces/geo-repository.interface.js';
 import { toAreaResponse, toCityResponse } from '../mappers/geo.mapper.js';
 
-const CITIES_CACHE_KEY = 'geo:cities:v1';
+export const CITIES_CACHE_KEY = 'geo:cities:v1';
 const CITIES_CACHE_TTL_SECONDS = 600;
 
 @Injectable()
