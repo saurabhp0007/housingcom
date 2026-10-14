@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Housing Updates</title>
+<style>
+  :root {
+    --bg: #f7f7fb; --card: #fff; --text: #16161d; --muted: #6b6b7b; --line: #e6e6ef;
+    --brand: #4f46e5; --on-brand: #fff; --ok: #15803d; --warn: #b45309; --bad: #b91c1c; --chip: #efeff6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e0e16; --card: #17171f; --text: #f1f1f6; --muted: #9a9aab; --line: #2a2a36;
+      --brand: #8b85ff; --on-brand: #0e0e16; --ok: #4ade80; --warn: #fbbf24; --bad: #f87171; --chip: #20202b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  h1 { font-size: 24px; margin: 0; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  p.muted, .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-top: 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  input, select, textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  textarea { min-height: 64px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-weight: 400; }
+  .check input { width: auto; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 10px; padding: 11px 16px; cursor: pointer; background: var(--brand); color: var(--on-brand); }
+  button.ghost { background: var(--chip); color: var(--text); padding: 7px 12px; font-size: 13px; }
+  button:disabled { opacity: .5; cursor: default; }
+  .primary { width: 100%; margin-top: 16px; }
+  .msg { margin-top: 12px; font-size: 14px; }
+  .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+  .update { border-top: 1px solid var(--line); padding: 14px 0; }
+  .update:first-child { border-top: 0; padding-top: 0; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .chip { background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+  .active { color: var(--ok); } .paused { color: var(--warn); } .rolled_back { color: var(--bad); }
+  .meta { font-size: 13px; color: var(--muted); margin-top: 4px; word-break: break-word; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .hidden { display: none; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>App updates</h1>
+    <button id="sign-out" class="ghost hidden">Lock</button>
+  </header>
+  <p class="muted">Publish OTA bundles built with <code>apps/mobile/build.sh ota</code>.</p>
+
+  <section id="unlock" class="card">
+    <h2>Unlock</h2>
+    <form id="unlock-form">
+      <label for="token">OTA admin token (<code>OTA_ADMIN_TOKEN</code> in deploy/.env)</label>
+      <input id="token" type="password" autocomplete="off" required>
+      <button class="primary" type="submit">Unlock</button>
+      <div id="unlock-msg" class="msg"></div>
+    </form>
+  </section>
+
+  <div id="console" class="hidden">
+    <section class="card">
+      <h2>Publish an update</h2>
+      <form id="publish-form">
+        <label for="bundle">Bundle (.zip)</label>
+        <input id="bundle" type="file" accept=".zip,application/zip" required>
+        <div class="row">
+          <div>
+            <label for="channel">Channel</label>
+            <select id="channel">
+              <option value="preview">preview</option>
+              <option value="production">production</option>
+              <option value="development">development</option>
+            </select>
+          </div>
+          <div>
+            <label for="rollout">Rollout %</label>
+            <input id="rollout" type="number" min="1" max="100" value="100" required>
+          </div>
+        </div>
+        <label for="message">Release note</label>
+        <textarea id="message" maxlength="500"></textarea>
+        <label class="check"><input id="critical" type="checkbox"> Critical (apply immediately on launch)</label>
+        <button id="publish" class="primary" type="submit">Publish</button>
+        <div id="publish-msg" class="msg"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Published updates</h2>
+      <div class="row">
+        <div>
+          <label for="filter-channel">Channel</label>
+          <select id="filter-channel">
+            <option value="">All</option>
+            <option value="preview">preview</option>
+            <option value="production">production</option>
+            <option value="development">development</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-platform">Platform</label>
+          <select id="filter-platform">
+            <option value="">All</option>
+            <option value="android">android</option>
+            <option value="ios">ios</option>
+          </select>
+        </div>
+      </div>
+      <div id="updates" class="msg">Loading…</div>
+    </section>
+  </div>
+</main>
+<script>
+  const API = '/api/ota/updates';
+  const KEY = 'housing.otaToken';
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get: () => { try { return sessionStorage.getItem(KEY); } catch { return null; } },
+    set: (v) => { try { sessionStorage.setItem(KEY, v); } catch {} },
+    clear: () => { try { sessionStorage.removeItem(KEY); } catch {} },
+  };
+  let token = store.get();
+
+  async function call(path, options = {}) {
+    const res = await fetch(API + path, {
+      ...options,
+      headers: { authorization: 'Bearer ' + token, ...(options.headers || {}) },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(body?.error?.message || res.statusText), { status: res.status });
+    return body.data;
+  }
+
+  function show(unlocked) {
+    $('unlock').classList.toggle('hidden', unlocked);
+    $('console').classList.toggle('hidden', !unlocked);
+    $('sign-out').classList.toggle('hidden', !unlocked);
+  }
+
+  function setMsg(el, text, kind) {
+    el.textContent = text;
+    el.className = 'msg' + (kind ? ' ' + kind : '');
+  }
+
+  function el(tag, attrs = {}, text) {
+    const node = document.createElement(tag);
+    Object.assign(node, attrs);
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  async function change(id, patch) {
+    await call('/' + id, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+    await load();
+  }
+
+  function render(items) {
+    const list = $('updates');
+    list.className = '';
+    list.replaceChildren();
+    if (!items.length) {
+      list.append(el('p', { className: 'muted' }, 'No updates yet.'));
+      return;
+    }
+    for (const u of items) {
+      const box = el('div', { className: 'update' });
+      const top = el('div', { className: 'top' });
+      top.append(
+        el('span', { className: 'chip ' + u.status }, u.status.replace('_', ' ')),
+        el('span', { className: 'chip' }, u.platform),
+        el('span', { className: 'chip' }, u.channel),
+        el('span', { className: 'chip' }, u.rolloutPercent + '%'),
+      );
+      if (u.isCritical) top.append(el('span', { className: 'chip rolled_back' }, 'critical'));
+      box.append(top);
+      if (u.message) box.append(el('div', {}, u.message));
+      box.append(el('div', { className: 'meta' },
+        new Date(u.createdAt).toLocaleString() +
+        ' · runtime ' + u.runtimeVersion.slice(0, 12) +
+        (u.gitCommit ? ' · ' + u.gitCommit : '') +
+        ' · ' + u.launchCount + ' launches, ' + u.crashCount + ' crashes (' + Math.round(u.crashRate * 100) + '%)'));
+
+      const actions = el('div', { className: 'actions' });
+      const button = (label, patch) => {
+        const b = el('button', { className: 'ghost', type: 'button' }, label);
+        b.onclick = async () => {
+          b.disabled = true;
+          try { await change(u.id, patch); } catch (e) { alert(e.message); b.disabled = false; }
+        };
+        return b;
+      };
+      if (u.status === 'active') actions.append(button('Pause', { status: 'paused' }));
+      if (u.status === 'paused') actions.append(button('Resume', { status: 'active' }));
+      if (u.status !== 'rolled_back') {
+        actions.append(button('Roll back', { status: 'rolled_back' }));
+        for (const pct of [10, 50, 100]) {
+          if (pct !== u.rolloutPercent) actions.append(button('Roll out ' + pct + '%', { rolloutPercent: pct }));
+        }
+      }
+      box.append(actions);
+      list.append(box);
+    }
+  }
+
+  async function load() {
+    const q = new URLSearchParams({ limit: '30' });
+    if ($('filter-channel').value) q.set('channel', $('filter-channel').value);
+    if ($('filter-platform').value) q.set('platform', $('filter-platform').value);
+    try {
+      render(await call('?' + q));
+    } catch (e) {
+      if (e.status === 401 || e.status === 403) return lock('Token rejected.');
+      setMsg($('updates'), e.message, 'bad');
+    }
+  }
+
+  function lock(reason) {
+    token = null;
+    store.clear();
+    show(false);
+    setMsg($('unlock-msg'), reason || '', reason ? 'bad' : '');
+  }
+
+  $('unlock-form').onsubmit = async (e) => {
+    e.preventDefault();
+    token = $('token').value.trim();
+    store.set(token);
+    $('token').value = '';
+    show(true);
+    await load();
+  };
+
+  $('sign-out').onclick = () => lock();
+  $('filter-channel').onchange = load;
+  $('filter-platform').onchange = load;
+
+  $('bundle').onchange = () => {
+    const file = $('bundle').files[0];
+    if (file && !$('message').value) $('message').value = file.name.replace(/\.zip$/i, '');
+    const channel = file && file.name.match(/^ota-(\w+)-/);
+    if (channel) $('channel').value = channel[1];
+  };
+
+  $('publish-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const file = $('bundle').files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.set('bundle', file, file.name);
+    form.set('channel', $('channel').value);
+    form.set('rolloutPercent', $('rollout').value);
+    form.set('isCritical', String($('critical').checked));
+    if ($('message').value.trim()) form.set('message', $('message').value.trim());
+    form.set('publishedBy', 'web');
+    $('publish').disabled = true;
+    setMsg($('publish-msg'), 'Uploading…');
+    try {
+      const data = await call('', { method: 'POST', body: form });
+      setMsg($('publish-msg'), 'Published ' + data.updates.map((u) => u.platform).join(' + ') + ' to ' + $('channel').value + '.', 'ok');
+      $('publish-form').reset();
+      await load();
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) return lock('Token rejected.');
+      setMsg($('publish-msg'), err.message, 'bad');
+    } finally {
+      $('publish').disabled = false;
+    }
+  };
+
+  if (token) { show(true); load(); } else { show(false); }
+</script>
+</body>
+</html>

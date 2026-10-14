@@ -7,11 +7,11 @@ import { authConfig } from '../../config/configuration.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthSession } from './entities/auth-session.entity.js';
-import { FirebaseIdentityVerifier } from './firebase/firebase-identity.verifier.js';
 import { AccessTokenGuard } from './guards/access-token.guard.js';
 import { RolesGuard } from './guards/roles.guard.js';
 import { AUTH_SESSIONS_REPOSITORY } from './interfaces/auth-sessions-repository.interface.js';
-import { IDENTITY_VERIFIER } from './interfaces/identity-verifier.interface.js';
+import { OTP_VERIFIER } from './interfaces/otp-verifier.interface.js';
+import { StaticOtpVerifier } from './otp/static-otp.verifier.js';
 import { TypeOrmAuthSessionsRepository } from './repositories/auth-sessions.repository.js';
 import { UserModerationListener } from './listeners/user-moderation.listener.js';
 import { AuthService } from './services/auth.service.js';
@@ -36,7 +36,7 @@ import { TokenService } from './services/token.service.js';
     TokenService,
     UserBlocklistService,
     UserModerationListener,
-    { provide: IDENTITY_VERIFIER, useClass: FirebaseIdentityVerifier },
+    { provide: OTP_VERIFIER, useClass: StaticOtpVerifier },
     { provide: AUTH_SESSIONS_REPOSITORY, useClass: TypeOrmAuthSessionsRepository },
     // Order matters: authenticate first, then authorize.
     { provide: APP_GUARD, useClass: AccessTokenGuard },

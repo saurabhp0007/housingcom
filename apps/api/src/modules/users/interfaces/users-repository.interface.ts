@@ -11,7 +11,7 @@ import type { User } from '../entities/user.entity.js';
 export const USERS_REPOSITORY = Symbol('USERS_REPOSITORY');
 
 export interface CreateUserData {
-  firebaseUid: string;
+  authUid: string;
   phone: string | null;
   email: string | null;
   fullName: string | null;
@@ -43,7 +43,7 @@ export interface UserCounts {
 export interface UsersRepository {
   /** Loads the user with their lister profile. */
   findById(id: string): Promise<User | null>;
-  findByFirebaseUid(firebaseUid: string): Promise<User | null>;
+  findByAuthUid(authUid: string): Promise<User | null>;
   create(data: CreateUserData): Promise<User>;
   updateProfile(
     id: string,

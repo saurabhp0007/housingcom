@@ -1,16 +1,20 @@
 import type {
   AuthSessionResponse,
   BecomeListerInput,
-  FirebaseLoginInput,
+  SendOtpInput,
   UpdateProfileInput,
   UserResponse,
+  VerifyOtpInput,
 } from '@housingcom/contracts';
 import { baseApi } from '@/shared/api/base-api';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    loginWithFirebase: build.mutation<AuthSessionResponse, FirebaseLoginInput>({
-      query: (body) => ({ url: '/auth/firebase', method: 'POST', body }),
+    sendOtp: build.mutation<void, SendOtpInput>({
+      query: (body) => ({ url: '/auth/otp/send', method: 'POST', body }),
+    }),
+    verifyOtp: build.mutation<AuthSessionResponse, VerifyOtpInput>({
+      query: (body) => ({ url: '/auth/otp/verify', method: 'POST', body }),
     }),
     logout: build.mutation<void, { refreshToken: string }>({
       query: (body) => ({ url: '/auth/logout', method: 'POST', body }),
@@ -31,7 +35,7 @@ export const authApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useLoginWithFirebaseMutation,
+  useSendOtpMutation,
   useLogoutMutation,
   useMeQuery,
   useUpdateMeMutation,

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
+  AuthProvider,
   UserStatus,
   type AuthSessionResponse,
   type AuthTokensResponse,
@@ -11,37 +12,40 @@ import { DomainEvent, type UserLoggedInEvent } from '../../../core/events/domain
 import type { User } from '../../users/entities/user.entity.js';
 import { toUserResponse } from '../../users/mappers/user.mapper.js';
 import { UsersService } from '../../users/services/users.service.js';
-import type { FirebaseLoginDto } from '../dto/firebase-login.dto.js';
+import type { VerifyOtpDto } from '../dto/otp.dto.js';
 import {
   AUTH_SESSIONS_REPOSITORY,
   type AuthSessionsRepository,
 } from '../interfaces/auth-sessions-repository.interface.js';
-import {
-  IDENTITY_VERIFIER,
-  type IdentityVerifier,
-} from '../interfaces/identity-verifier.interface.js';
+import { OTP_VERIFIER, type OtpVerifier } from '../interfaces/otp-verifier.interface.js';
 import { TokenService } from './token.service.js';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(IDENTITY_VERIFIER) private readonly identityVerifier: IdentityVerifier,
+    @Inject(OTP_VERIFIER) private readonly otp: OtpVerifier,
     @Inject(AUTH_SESSIONS_REPOSITORY) private readonly sessions: AuthSessionsRepository,
     private readonly usersService: UsersService,
     private readonly tokens: TokenService,
     private readonly events: EventEmitter2,
   ) {}
 
-  /** Exchanges a Firebase ID token (phone OTP / Google / Apple) for our own session. */
-  async loginWithFirebase(dto: FirebaseLoginDto): Promise<AuthSessionResponse> {
-    const identity = await this.identityVerifier.verify(dto.idToken);
+  sendOtp(phone: string): Promise<void> {
+    return this.otp.send(phone);
+  }
+
+  /** Exchanges a phone number + one-time code for our own session. */
+  async loginWithOtp(dto: VerifyOtpDto): Promise<AuthSessionResponse> {
+    if (!(await this.otp.verify(dto.phone, dto.code))) {
+      throw AppException.unauthorized(ErrorCode.InvalidOtp, 'That code is incorrect.');
+    }
     const { user, isNew } = await this.usersService.findOrCreateByIdentity({
-      firebaseUid: identity.uid,
-      phone: identity.phone,
-      email: identity.email,
-      fullName: identity.name,
-      avatarUrl: identity.picture,
-      authProvider: identity.provider,
+      authUid: `phone:${dto.phone}`,
+      phone: dto.phone,
+      email: null,
+      fullName: null,
+      avatarUrl: null,
+      authProvider: AuthProvider.Phone,
     });
     this.assertActive(user);
 

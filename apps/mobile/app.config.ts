@@ -1,9 +1,10 @@
 import { existsSync } from 'node:fs';
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import { version as VERSION } from './package.json';
 
 /**
  * All environment-specific values come from env vars (EXPO_PUBLIC_* are inlined into JS;
- * the rest only affect native config). See .env.example.
+ * the rest only affect native config). See .env.
  */
 const APP_VARIANT = (process.env.APP_VARIANT ?? 'development') as
   'development' | 'preview' | 'production';
@@ -19,6 +20,10 @@ const UPDATE_CHANNEL = process.env.UPDATE_CHANNEL ?? APP_VARIANT;
 const OTA_CERT_PATH = './certs/certificate.pem';
 const OTA_SIGNING_ENABLED = existsSync(OTA_CERT_PATH);
 
+/** package.json is the only place the version lives; build.sh bumps it. 1.2.3 → versionCode 10203. */
+const [MAJOR = 0, MINOR = 0, PATCH = 0] = VERSION.split('.').map(Number);
+const VERSION_CODE = MAJOR * 10_000 + MINOR * 100 + PATCH;
+
 const BUNDLE_ID = IS_PROD ? 'com.quantumtech.housing' : `com.quantumtech.housing.${APP_VARIANT}`;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -28,7 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // Native app only; the PRD excludes a website / web version.
   platforms: ['ios', 'android'],
   scheme: 'housing',
-  version: '1.0.0',
+  version: VERSION,
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
@@ -55,9 +60,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   ios: {
     bundleIdentifier: BUNDLE_ID,
+    buildNumber: String(VERSION_CODE),
     supportsTablet: false,
-    usesAppleSignIn: true,
-    googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? './firebase/GoogleService-Info.plist',
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
         'We use your location to show rooms, flats and PGs near you.',
@@ -66,9 +70,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: BUNDLE_ID,
+    versionCode: VERSION_CODE,
     predictiveBackGestureEnabled: true,
-    googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './firebase/google-services.json',
-    config: { googleMaps: { apiKey: process.env.GOOGLE_MAPS_ANDROID_API_KEY } },
     permissions: ['ACCESS_COARSE_LOCATION', 'ACCESS_FINE_LOCATION'],
     adaptiveIcon: {
       backgroundColor: '#4F46E5',
@@ -83,7 +86,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-updates',
     'expo-secure-store',
     'expo-font',
-    'expo-apple-authentication',
     [
       'expo-splash-screen',
       {
@@ -108,24 +110,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-video',
-    // Google Maps on Android, Apple Maps on iOS (no Google key needed on iOS).
-    [
-      'expo-maps',
-      {
-        requestLocationPermission: true,
-        locationPermission: 'We use your location to show places near you.',
-      },
-    ],
-    '@react-native-firebase/app',
-    '@react-native-firebase/auth',
-    [
-      '@react-native-google-signin/google-signin',
-      {
-        iosUrlScheme: process.env.GOOGLE_IOS_URL_SCHEME ?? 'com.googleusercontent.apps.placeholder',
-      },
-    ],
-    // React Native Firebase on iOS needs static frameworks.
-    ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
   ],
 
   experiments: { typedRoutes: true },

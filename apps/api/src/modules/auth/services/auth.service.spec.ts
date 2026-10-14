@@ -6,7 +6,7 @@ import type { User } from '../../users/entities/user.entity.js';
 import type { UsersService } from '../../users/services/users.service.js';
 import type { AuthSession } from '../entities/auth-session.entity.js';
 import type { AuthSessionsRepository } from '../interfaces/auth-sessions-repository.interface.js';
-import type { IdentityVerifier } from '../interfaces/identity-verifier.interface.js';
+import type { OtpVerifier } from '../interfaces/otp-verifier.interface.js';
 import { AuthService } from './auth.service.js';
 import { TokenService } from './token.service.js';
 
@@ -14,12 +14,13 @@ const config = {
   accessTokenSecret: 'x'.repeat(40),
   accessTokenTtlSeconds: 900,
   refreshTokenTtlDays: 30,
+  staticOtp: '000000',
 };
 
 function makeUser(overrides: Partial<User> = {}): User {
   return {
     id: 'user-1',
-    firebaseUid: 'fb-1',
+    authUid: 'phone:+919876543210',
     phone: '+919876543210',
     email: null,
     fullName: null,
@@ -75,15 +76,9 @@ class FakeSessions implements AuthSessionsRepository {
 
 function setup(user = makeUser()) {
   const sessions = new FakeSessions();
-  const verifier: IdentityVerifier = {
-    verify: vi.fn().mockResolvedValue({
-      uid: 'fb-1',
-      provider: AuthProvider.Phone,
-      phone: user.phone,
-      email: null,
-      name: null,
-      picture: null,
-    }),
+  const otp: OtpVerifier = {
+    send: vi.fn().mockResolvedValue(undefined),
+    verify: vi.fn(async (_phone: string, code: string) => code === '000000'),
   };
   const users = {
     findOrCreateByIdentity: vi.fn().mockResolvedValue({ user, isNew: true }),
@@ -93,15 +88,17 @@ function setup(user = makeUser()) {
   } as unknown as UsersService;
   const tokens = new TokenService(new JwtService({ secret: config.accessTokenSecret }), config);
   const events = new EventEmitter2();
-  const service = new AuthService(verifier, sessions, users, tokens, events);
+  const service = new AuthService(otp, sessions, users, tokens, events);
   return { service, sessions, tokens, users };
 }
 
+const credentials = { phone: '+919876543210', code: '000000' };
+
 describe('AuthService', () => {
-  it('logs in with a Firebase token and returns a session', async () => {
+  it('logs in with a valid OTP and returns a session', async () => {
     const { service, sessions, tokens } = setup();
-    const result = await service.loginWithFirebase({
-      idToken: 'firebase-id-token',
+    const result = await service.loginWithOtp({
+      ...credentials,
       device: { id: 'device-1', platform: 'android' },
     });
 
@@ -115,7 +112,7 @@ describe('AuthService', () => {
 
   it('rotates refresh tokens and rejects reuse of the old one', async () => {
     const { service } = setup();
-    const login = await service.loginWithFirebase({ idToken: 't' });
+    const login = await service.loginWithOtp(credentials);
 
     const refreshed = await service.refresh(login.refreshToken);
     expect(refreshed.refreshToken).not.toBe(login.refreshToken);
@@ -125,24 +122,31 @@ describe('AuthService', () => {
 
   it('replaces the previous session when logging in again on the same device', async () => {
     const { service } = setup();
-    const first = await service.loginWithFirebase({
-      idToken: 't',
+    const first = await service.loginWithOtp({
+      ...credentials,
       device: { id: 'd1', platform: 'ios' },
     });
-    await service.loginWithFirebase({ idToken: 't', device: { id: 'd1', platform: 'ios' } });
+    await service.loginWithOtp({ ...credentials, device: { id: 'd1', platform: 'ios' } });
     await expect(service.refresh(first.refreshToken)).rejects.toBeInstanceOf(AppException);
   });
 
   it('invalidates the session on logout', async () => {
     const { service } = setup();
-    const login = await service.loginWithFirebase({ idToken: 't' });
+    const login = await service.loginWithOtp(credentials);
     await service.logout(login.refreshToken);
     await expect(service.refresh(login.refreshToken)).rejects.toBeInstanceOf(AppException);
   });
 
+  it('rejects a wrong code', async () => {
+    const { service } = setup();
+    await expect(service.loginWithOtp({ ...credentials, code: '123456' })).rejects.toMatchObject({
+      code: 'AUTH_INVALID_OTP',
+    });
+  });
+
   it('refuses blocked users', async () => {
     const { service } = setup(makeUser({ status: UserStatus.Blocked }));
-    await expect(service.loginWithFirebase({ idToken: 't' })).rejects.toMatchObject({
+    await expect(service.loginWithOtp(credentials)).rejects.toMatchObject({
       code: 'AUTH_USER_BLOCKED',
     });
   });

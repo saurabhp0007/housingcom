@@ -4,8 +4,8 @@ Turborepo monorepo: **NestJS API** + **Expo (React Native) app** + a self-hosted
 
 ```
 apps/
-  api/          NestJS 12 · TypeORM · PostgreSQL + PostGIS · Redis + BullMQ · Firebase Admin
-  mobile/       Expo SDK 57 (iOS + Android only) · Expo Router · Expo UI · expo-maps · Redux Toolkit + RTK Query
+  api/          NestJS 12 · TypeORM · PostgreSQL + PostGIS · Redis + BullMQ
+  mobile/       Expo SDK 57 (iOS + Android only) · Expo Router · Expo UI · Leaflet/OpenStreetMap · Redux Toolkit + RTK Query
 packages/
   contracts/    Shared enums, zod schemas and response types (API ⇄ app)
   ui/           Design system over @expo/ui: Material 3 on Android, SwiftUI on iOS
@@ -19,15 +19,31 @@ scripts/        ota-publish / ota-record-runtime
 ```bash
 pnpm install
 pnpm infra:up                         # Postgres+PostGIS and Redis (docker compose)
-cp apps/api/.env.example apps/api/.env
 pnpm build                            # builds shared packages + API
 pnpm db:migrate && pnpm --filter @housingcom/api seed
 pnpm --filter @housingcom/api dev     # http://localhost:4000/api · Swagger at /docs
 
-cp apps/mobile/.env.example apps/mobile/.env
-# add Firebase files to apps/mobile/firebase/ (see README there)
-pnpm --filter @housingcom/mobile android   # dev build (Expo UI and Firebase need a dev build, not Expo Go)
+pnpm --filter @housingcom/mobile android   # dev build (Expo UI needs a dev build, not Expo Go)
 ```
+
+Sign in with any Indian mobile number and the code from `OTP_STATIC_CODE` (`000000`); no SMS is sent yet.
+
+## Deploy (single VPS)
+
+`deploy/` runs Postgres, Redis, the API and Caddy (automatic HTTPS) with Docker Compose. Uploaded files
+live in the `storage` volume and are served by the API.
+
+```bash
+rsync -az --exclude node_modules --exclude .git --exclude apps/mobile ./ root@<server>:/opt/housing/
+ssh root@<server>
+cd /opt/housing/deploy
+docker compose up -d --build     # migrations and seeds run on every start
+docker compose exec api node dist/core/database/seeds/make-admin.js --phone +91XXXXXXXXXX
+```
+
+Env files are not committed: `apps/api/.env` (local API), `apps/mobile/.env` (app build) and `deploy/.env`
+(server stack, including `DOMAIN` and generated secrets). The variables are defined and validated in
+`apps/api/src/config/env.schema.ts`.
 
 | Command                                        | What it does                                    |
 | ---------------------------------------------- | ----------------------------------------------- |
@@ -44,7 +60,7 @@ pnpm --filter @housingcom/mobile android   # dev build (Expo UI and Firebase nee
 ## Phase status
 
 **Phase 1:** monorepo, API core (config, errors, envelope, guards, events, queues, cache, storage),
-auth (Firebase → JWT + rotating refresh sessions), users and lister mode, geo (PostGIS), remote app config,
+auth (phone OTP → JWT + rotating refresh sessions), users and lister mode, geo (PostGIS), remote app config,
 self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, CLI), and the app shell.
 
 **Phase 2:**
@@ -125,9 +141,10 @@ if enhanced push security is on).
 - **Content:** FAQs, terms, privacy and about pages, and Home banners (with images, a city, an end date
   and a link) are all edited in the app. Customers see them under **Help & FAQs** and on Home.
 
-Payments setup: in production set `PAYMENTS_DRIVER=razorpay`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
-and `RAZORPAY_WEBHOOK_SECRET` (the API refuses to boot without them). Then add a webhook in the Razorpay
+Payments setup: `PAYMENTS_DRIVER=fake` simulates checkout (the app asks you to confirm a test payment).
+For Razorpay set `PAYMENTS_DRIVER=razorpay`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and
+`RAZORPAY_WEBHOOK_SECRET` (test-mode `rzp_test_…` keys work; in production the API refuses to boot
+without them). Then add a webhook in the Razorpay
 dashboard pointing to `<PUBLIC_BASE_URL>/api/payments/webhooks/razorpay` for the `payment.captured`,
-`order.paid` and `payment.failed` events. For local development, `PAYMENTS_DRIVER=fake` simulates payments
-(the app asks you to confirm a test payment). It is refused in production. As the PRD notes, check the
+`order.paid` and `payment.failed` events. As the PRD notes, check the
 app-store rules on selling digital promotions before launch.

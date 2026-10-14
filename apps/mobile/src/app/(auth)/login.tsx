@@ -1,19 +1,14 @@
-import { AppText, Button, HStack, Screen, TextField, VStack, useTheme } from '@housingcom/ui';
+import { AppText, Button, Screen, TextField, VStack } from '@housingcom/ui';
 import { router } from 'expo-router';
 import { phoneSchema } from '@housingcom/contracts';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { SocialSignInButtons } from '@/features/auth/components/SocialSignInButtons';
-import {
-  firebaseAuthService,
-  firebaseErrorMessage,
-} from '@/features/auth/services/firebase-auth.service';
+import { useSendOtpMutation } from '@/features/auth/auth.api';
+import { toAppError } from '@/shared/api/api-error';
 
 export default function LoginScreen() {
-  const { colors } = useTheme();
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string>();
-  const [isSubmitting, setSubmitting] = useState(false);
+  const [sendOtp, { isLoading: isSubmitting }] = useSendOtpMutation();
 
   const onSubmit = async () => {
     // Same rule the API uses (shared contract).
@@ -22,14 +17,11 @@ export default function LoginScreen() {
       return;
     }
     setError(undefined);
-    setSubmitting(true);
     try {
-      await firebaseAuthService.sendOtp(`+91${phone}`);
+      await sendOtp({ phone: `+91${phone}` }).unwrap();
       router.push({ pathname: '/verify', params: { phone } });
     } catch (e) {
-      setError(firebaseErrorMessage(e));
-    } finally {
-      setSubmitting(false);
+      setError(toAppError(e).message);
     }
   };
 
@@ -69,16 +61,6 @@ export default function LoginScreen() {
           error={error}
         />
 
-        <HStack align="center" gap="md">
-          <View style={[styles.rule, { backgroundColor: colors.border }]} />
-          <AppText variant="caption" color="textSecondary">
-            or
-          </AppText>
-          <View style={[styles.rule, { backgroundColor: colors.border }]} />
-        </HStack>
-
-        <SocialSignInButtons />
-
         <AppText variant="caption" color="textSecondary" align="center">
           By continuing you agree to our Terms and Privacy Policy.
         </AppText>
@@ -86,5 +68,3 @@ export default function LoginScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({ rule: { flex: 1, height: StyleSheet.hairlineWidth } });

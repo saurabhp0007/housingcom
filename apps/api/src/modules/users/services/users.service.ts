@@ -39,7 +39,7 @@ export class UsersService {
 
   /** Used by auth: returns the existing user for this identity or registers a new one. */
   async findOrCreateByIdentity(data: CreateUserData): Promise<{ user: User; isNew: boolean }> {
-    const existing = await this.users.findByFirebaseUid(data.firebaseUid);
+    const existing = await this.users.findByAuthUid(data.authUid);
     if (existing) return { user: existing, isNew: false };
 
     const created = await this.users.create(data);

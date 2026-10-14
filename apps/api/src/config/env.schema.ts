@@ -31,17 +31,11 @@ export const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  /** Phone sign-in code accepted for every number (no SMS provider yet). */
+  OTP_STATIC_CODE: z.string().regex(/^\d{6}$/),
 
-  FIREBASE_PROJECT_ID: optionalString,
-  FIREBASE_CLIENT_EMAIL: optionalString,
-  FIREBASE_PRIVATE_KEY: optionalString,
-
-  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  /** Uploaded media, documents and OTA assets live on this disk path. */
   STORAGE_LOCAL_DIR: z.string().default('./storage'),
-  S3_BUCKET: optionalString,
-  S3_REGION: z.string().default('ap-south-1'),
-  S3_ENDPOINT: optionalString,
-  STORAGE_PUBLIC_BASE_URL: optionalString,
 
   OTA_ADMIN_TOKEN: z.string().min(32),
   OTA_SIGNING_PRIVATE_KEY_PATH: optionalString,
@@ -61,7 +55,7 @@ export const envSchema = z.object({
     .transform((v) => v === 'true' || v === '1'),
   EXPO_ACCESS_TOKEN: optionalString,
 
-  /** Razorpay in every real environment; `fake` simulates payments for local development and tests. */
+  /** `razorpay` charges for real (test or live keys); `fake` simulates checkout in the app. */
   PAYMENTS_DRIVER: z.enum(['razorpay', 'fake']).default('razorpay'),
   RAZORPAY_KEY_ID: optionalString,
   RAZORPAY_KEY_SECRET: optionalString,
@@ -78,20 +72,6 @@ export type Env = z.infer<typeof envSchema>;
 export function validateEnv(raw: Record<string, unknown>): Env {
   const parsed = envSchema
     .superRefine((env, ctx) => {
-      if (env.STORAGE_DRIVER === 's3' && !env.S3_BUCKET) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['S3_BUCKET'],
-          message: 'Required when STORAGE_DRIVER=s3',
-        });
-      }
-      if (env.NODE_ENV === 'production' && env.PAYMENTS_DRIVER === 'fake') {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['PAYMENTS_DRIVER'],
-          message: 'The fake payment driver is not allowed in production',
-        });
-      }
       if (env.PAYMENTS_DRIVER === 'razorpay' && env.NODE_ENV === 'production') {
         for (const key of [
           'RAZORPAY_KEY_ID',

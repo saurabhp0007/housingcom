@@ -3,10 +3,6 @@ import type { ConfigType } from '@nestjs/config';
 import { appConfig } from '../../../config/configuration.js';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
-import {
-  OBJECT_STORAGE,
-  type ObjectStorage,
-} from '../../../core/storage/object-storage.interface.js';
 import type { OtaAssetRecord, OtaClientRequest } from '../domain/ota.types.js';
 import type { OtaUpdate } from '../entities/ota-update.entity.js';
 import {
@@ -31,7 +27,6 @@ export interface OtaManifestResponse {
 export class OtaManifestService {
   constructor(
     @Inject(OTA_UPDATES_REPOSITORY) private readonly updates: OtaUpdatesRepository,
-    @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
     @Inject(appConfig.KEY) private readonly app: ConfigType<typeof appConfig>,
     private readonly signing: OtaSigningService,
   ) {}
@@ -99,9 +94,7 @@ export class OtaManifestService {
       key: asset.key,
       contentType: asset.contentType,
       fileExtension: asset.fileExtension,
-      url:
-        this.storage.publicUrl(asset.storageKey) ??
-        `${this.app.publicBaseUrl}/${this.app.apiPrefix}/ota/assets/${asset.storageKey.slice(OTA_ASSET_PREFIX.length + 1)}`,
+      url: `${this.app.publicBaseUrl}/${this.app.apiPrefix}/ota/assets/${asset.storageKey.slice(OTA_ASSET_PREFIX.length + 1)}`,
     };
   }
 }

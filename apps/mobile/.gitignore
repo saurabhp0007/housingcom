@@ -44,3 +44,6 @@ yarn-error.*
 firebase/*.json
 firebase/*.plist
 .env
+
+# build.sh output (APKs and OTA bundles)
+/builds

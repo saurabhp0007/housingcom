@@ -1,6 +1,17 @@
 {
   "$comment": "Runtime fingerprints of native builds shipped per channel. `pnpm ota:publish` refuses to publish an OTA update for a fingerprint that no shipped binary has. Updated by `pnpm ota:record-runtime` after every store / internal build.",
-  "development": { "android": [], "ios": [] },
-  "preview": { "android": [], "ios": [] },
-  "production": { "android": [], "ios": [] }
+  "development": {
+    "android": [],
+    "ios": []
+  },
+  "preview": {
+    "android": [
+      "ab8b13c6084eeedd38230b2ef74a57c4f5657db4"
+    ],
+    "ios": []
+  },
+  "production": {
+    "android": [],
+    "ios": []
+  }
 }

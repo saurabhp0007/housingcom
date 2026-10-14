@@ -1,0 +1,16 @@
+{$DOMAIN} {
+	encode zstd gzip
+
+	redir /updates /updates/
+	handle_path /updates/* {
+		root * /srv/web/updates
+		file_server
+	}
+
+	handle {
+		request_body {
+			max_size 200MB
+		}
+		reverse_proxy api:4000
+	}
+}

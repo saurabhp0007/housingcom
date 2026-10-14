@@ -44,27 +44,11 @@ export const authConfig = registerAs('auth', () => {
     accessTokenSecret: e.JWT_ACCESS_SECRET,
     accessTokenTtlSeconds: e.JWT_ACCESS_TTL_SECONDS,
     refreshTokenTtlDays: e.REFRESH_TOKEN_TTL_DAYS,
+    staticOtp: e.OTP_STATIC_CODE,
   };
 });
 
-export const firebaseConfig = registerAs('firebase', () => {
-  const e = env();
-  return {
-    projectId: e.FIREBASE_PROJECT_ID,
-    clientEmail: e.FIREBASE_CLIENT_EMAIL,
-    privateKey: e.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  };
-});
-
-export const storageConfig = registerAs('storage', () => {
-  const e = env();
-  return {
-    driver: e.STORAGE_DRIVER,
-    localDir: e.STORAGE_LOCAL_DIR,
-    s3: { bucket: e.S3_BUCKET, region: e.S3_REGION, endpoint: e.S3_ENDPOINT },
-    publicBaseUrl: e.STORAGE_PUBLIC_BASE_URL?.replace(/\/$/, ''),
-  };
-});
+export const storageConfig = registerAs('storage', () => ({ localDir: env().STORAGE_LOCAL_DIR }));
 
 export const otaConfig = registerAs('ota', () => {
   const e = env();
@@ -111,7 +95,6 @@ export const allConfigs = [
   databaseConfig,
   redisConfig,
   authConfig,
-  firebaseConfig,
   storageConfig,
   otaConfig,
   geoConfig,

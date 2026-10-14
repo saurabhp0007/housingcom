@@ -30,7 +30,7 @@ Core (`src/core`) provides cross-cutting pieces:
 - **Events:** `DomainEvent` constants and typed payloads. In-process via `@nestjs/event-emitter`;
   slow or retryable work goes to **BullMQ** queues (`QueueName`).
 - **Cache:** `CacheService.wrap()` over Redis. Failures degrade to a cache miss.
-- **Storage:** `ObjectStorage` interface with local-disk (dev) and S3/CDN (prod) drivers.
+- **Storage:** `ObjectStorage` interface backed by the local disk (a Docker volume in production); public files are served by the API's `/files` route.
 - **Database:** migrations only (`synchronize: false`). Generate migrations from entities and check for drift
   with `typeorm migration:generate --check`.
 
@@ -52,8 +52,9 @@ Real time: `ChatGateway` (Socket.IO namespace `/chat`) authenticates the handsha
 and joins the socket to `user:<id>`. `RedisIoAdapter` fans emits out across API instances. Clients only
 receive over the socket; writes go through REST so they are validated, throttled and retried like any other.
 
-Auth flow: the app signs in with Firebase (phone OTP / Google / Apple) and posts the Firebase ID token to
-`POST /auth/firebase`. The API verifies it, finds or creates the user, and returns a 15-minute access JWT plus
+Auth flow: the app posts the phone number to `POST /auth/otp/send`, then the code to `POST /auth/otp/verify`.
+An `OtpVerifier` checks the code (`StaticOtpVerifier` accepts `OTP_STATIC_CODE` until an SMS provider is
+plugged in). The API finds or creates the user, and returns a 15-minute access JWT plus
 an opaque refresh token. Only the token's SHA-256 is stored; the token rotates on every refresh, and reuse is rejected.
 
 ## App (`apps/mobile`)

@@ -28,8 +28,8 @@ export class TypeOrmUsersRepository implements UsersRepository {
     return this.users.findOne({ where: { id }, relations: { listerProfile: true } });
   }
 
-  findByFirebaseUid(firebaseUid: string): Promise<User | null> {
-    return this.users.findOne({ where: { firebaseUid }, relations: { listerProfile: true } });
+  findByAuthUid(authUid: string): Promise<User | null> {
+    return this.users.findOne({ where: { authUid }, relations: { listerProfile: true } });
   }
 
   create(data: CreateUserData): Promise<User> {

@@ -1,8 +1,8 @@
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { sessionService } from '@/features/auth/services/session.service';
 import { useChatRealtime } from '@/features/chat/hooks/useChatRealtime';
-import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
 import { UpdatingOverlay } from '@/features/app-updates/components/UpdatingOverlay';
 import { useOtaUpdates } from '@/features/app-updates/hooks/useOtaUpdates';
 import {
@@ -14,6 +14,18 @@ import { SEARCH_STORAGE_KEY, registerSearchListeners } from '@/features/search/s
 import { searchHydrated, type SearchState } from '@/features/search/search.slice';
 import { persistedState } from '../storage/persisted-state';
 import { useAppDispatch } from '../store/hooks';
+
+/**
+ * expo-notifications throws on load inside Expo Go (no remote push since SDK 53), so the push
+ * hook is only required in real builds. Chosen once at startup, so hook order never changes.
+ */
+const usePushNotifications: () => void =
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient
+    ? () => undefined
+    : (
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- deliberately lazy, see above
+        require('@/features/notifications/hooks/usePushNotifications') as typeof import('@/features/notifications/hooks/usePushNotifications')
+      ).usePushNotifications;
 
 void SplashScreen.preventAutoHideAsync();
 registerLocationListeners();

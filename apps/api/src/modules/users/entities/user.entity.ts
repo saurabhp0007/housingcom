@@ -5,10 +5,10 @@ import { ListerProfile } from './lister-profile.entity.js';
 
 @Entity('users')
 export class User extends BaseEntity {
-  /** Firebase Auth UID: the identity behind phone OTP, Google and Apple sign-in. */
+  /** Stable sign-in identity, e.g. `phone:+919876543210`. */
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 128 })
-  firebaseUid: string;
+  authUid: string;
 
   @Index({ unique: true, where: 'phone IS NOT NULL' })
   @Column({ type: 'varchar', length: 20, nullable: true })

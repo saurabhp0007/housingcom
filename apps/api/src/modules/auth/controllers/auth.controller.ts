@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { AuthSessionResponse, AuthTokensResponse } from '@housingcom/contracts';
 import { Public } from '../../../core/http/decorators/index.js';
-import { FirebaseLoginDto } from '../dto/firebase-login.dto.js';
+import { SendOtpDto, VerifyOtpDto } from '../dto/otp.dto.js';
 import { RefreshTokenDto } from '../dto/refresh-token.dto.js';
 import { AuthService } from '../services/auth.service.js';
 
@@ -14,10 +14,16 @@ import { AuthService } from '../services/auth.service.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('firebase')
+  @Post('otp/send')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  sendOtp(@Body() dto: SendOtpDto): Promise<void> {
+    return this.authService.sendOtp(dto.phone);
+  }
+
+  @Post('otp/verify')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: FirebaseLoginDto): Promise<AuthSessionResponse> {
-    return this.authService.loginWithFirebase(dto);
+  verifyOtp(@Body() dto: VerifyOtpDto): Promise<AuthSessionResponse> {
+    return this.authService.loginWithOtp(dto);
   }
 
   @Post('refresh')

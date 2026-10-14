@@ -5,18 +5,18 @@ import { secureStorage } from '@/shared/storage/secure-storage';
 import { sessionCleared, sessionStarted } from '@/shared/store/session.slice';
 import type { AppDispatch } from '@/shared/store/types';
 import { authApi } from '../auth.api';
-import { firebaseAuthService } from './firebase-auth.service';
 
 const devicePlatform = Platform.OS === 'ios' ? 'ios' : 'android';
 
 /** Session lifecycle: sign-in exchange, silent restore on launch, sign-out. */
 export const sessionService = {
-  /** Exchanges a Firebase ID token for an API session and stores it. */
-  async signIn(dispatch: AppDispatch, idToken: string): Promise<AuthSessionResponse> {
+  /** Exchanges a phone number + OTP for an API session and stores it. */
+  async signIn(dispatch: AppDispatch, phone: string, code: string): Promise<AuthSessionResponse> {
     const deviceId = await secureStorage.getOrCreateDeviceId();
     const session = await dispatch(
-      authApi.endpoints.loginWithFirebase.initiate({
-        idToken,
+      authApi.endpoints.verifyOtp.initiate({
+        phone,
+        code,
         device: { id: deviceId, platform: devicePlatform },
       }),
     ).unwrap();
@@ -67,7 +67,6 @@ export const sessionService = {
         .catch(() => undefined);
     }
     await secureStorage.clearRefreshToken();
-    await firebaseAuthService.signOut();
     dispatch(sessionCleared());
     dispatch(authApi.util.resetApiState());
   },

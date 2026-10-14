@@ -1,25 +1,19 @@
 import { AppText, Button, Screen, TextField, VStack } from '@housingcom/ui';
-import { router, useLocalSearchParams } from 'expo-router';
+import { OTP_LENGTH } from '@housingcom/contracts';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useSendOtpMutation } from '@/features/auth/auth.api';
 import { useSignIn } from '@/features/auth/hooks/useSignIn';
-import {
-  firebaseAuthService,
-  firebaseErrorMessage,
-} from '@/features/auth/services/firebase-auth.service';
-
-const OTP_LENGTH = 6;
+import { toAppError } from '@/shared/api/api-error';
 const RESEND_AFTER_S = 30;
 
 export default function VerifyScreen() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
-  const { run, busy } = useSignIn();
+  const { signIn, busy } = useSignIn();
+  const [sendOtp] = useSendOtpMutation();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
   const [resendIn, setResendIn] = useState(RESEND_AFTER_S);
-
-  useEffect(() => {
-    if (!firebaseAuthService.hasPendingOtp()) router.back();
-  }, []);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -30,16 +24,16 @@ export default function VerifyScreen() {
   const verify = async (value = code) => {
     if (value.length !== OTP_LENGTH || busy) return;
     setError(undefined);
-    const ok = await run(() => firebaseAuthService.confirmOtp(value));
+    const ok = await signIn(`+91${phone}`, value);
     if (!ok) setCode('');
   };
 
   const resend = async () => {
     try {
-      await firebaseAuthService.sendOtp(`+91${phone}`);
+      await sendOtp({ phone: `+91${phone}` }).unwrap();
       setResendIn(RESEND_AFTER_S);
     } catch (e) {
-      setError(firebaseErrorMessage(e));
+      setError(toAppError(e).message);
     }
   };
 

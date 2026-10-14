@@ -21,7 +21,7 @@ class BannerFileParams {
 }
 
 /**
- * Serves public listing media and banners when no CDN is configured. Only the `listings/` and
+ * Serves public listing media and banners. Only the `listings/` and
  * `banners/` prefixes are reachable, and names are validated, so private files (verification documents) can never leak.
  */
 @ApiExcludeController()

@@ -42,7 +42,7 @@ curl -X POST "$OTA_API_URL/ota/updates" -H "Authorization: Bearer $OTA_ADMIN_TOK
 | Native binary too old        | `/app-config` `minSupportedVersion` shows a blocking "Update from store" screen. `latestVersion` shows a soft nudge.                                                                     |
 
 Manifest and asset endpoints are not rate-limited, because many phones share IPs behind carrier NAT.
-Assets are content-addressed (`sha256.ext`) and immutable, so put a CDN in front (`STORAGE_PUBLIC_BASE_URL`).
+Assets are content-addressed (`sha256.ext`) and immutable, and are served by the API with long-lived cache headers.
 
 ## Code signing (recommended for production)
 

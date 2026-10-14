@@ -7,7 +7,7 @@ import {
 import { mimeForExtension } from '../../../core/utils/mime.util.js';
 import { OTA_ASSET_PREFIX } from './ota-publish.service.js';
 
-/** Streams OTA assets when no CDN is configured (local dev, or as a fallback). */
+/** Streams OTA assets from storage. */
 @Injectable()
 export class OtaAssetsService {
   constructor(@Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage) {}

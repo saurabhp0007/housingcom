@@ -8,7 +8,7 @@ export const ErrorCode = {
   RateLimited: 'RATE_LIMITED',
   Internal: 'INTERNAL_ERROR',
 
-  InvalidIdentityToken: 'AUTH_INVALID_IDENTITY_TOKEN',
+  InvalidOtp: 'AUTH_INVALID_OTP',
   InvalidRefreshToken: 'AUTH_INVALID_REFRESH_TOKEN',
   UserBlocked: 'AUTH_USER_BLOCKED',
 
