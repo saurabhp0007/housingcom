@@ -12,3 +12,5 @@ coverage/
 .ota/
 keys/
 *.pem
+# Local Redis snapshots
+dump.rdb
