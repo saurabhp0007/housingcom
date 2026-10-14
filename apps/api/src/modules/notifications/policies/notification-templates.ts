@@ -16,6 +16,15 @@ export interface NotificationContent {
 const quote = (title: string | null) => `"${title ?? 'Your listing'}"`;
 const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
+/** "Tue, 14 Mar" from an ISO timestamp, in India time. */
+const formatDay = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-IN', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'Asia/Kolkata',
+  });
+
 const formatDate = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', {
     weekday: 'short',
@@ -152,6 +161,36 @@ export const NotificationTemplates = {
     title: `New match: ${truncate(label, 40)}`,
     body: `${quote(title)} just went live.`,
     url: `/listing/${listingId}`,
+  }),
+
+  featuredActivated: (
+    listingId: string,
+    title: string | null,
+    endsAt: string,
+    renewed: boolean,
+  ): NotificationContent => ({
+    type: NotificationType.PaymentReceived,
+    title: renewed ? 'Featured plan extended' : 'Your listing is featured',
+    body: `${quote(title)} is featured until ${formatDay(endsAt)}. Track its views in Featured.`,
+    url: '/lister/featured',
+  }),
+
+  featuredExpiring: (
+    listingId: string,
+    title: string | null,
+    endsAt: string,
+  ): NotificationContent => ({
+    type: NotificationType.FeaturedExpiring,
+    title: 'Featured plan ends soon',
+    body: `${quote(title)} stops being featured on ${formatDay(endsAt)}. Renew to keep the top spot.`,
+    url: `/lister/feature/${listingId}`,
+  }),
+
+  featuredEnded: (listingId: string, title: string | null): NotificationContent => ({
+    type: NotificationType.FeaturedEnded,
+    title: 'Featured plan ended',
+    body: `${quote(title)} is back to normal ranking. Renew anytime.`,
+    url: `/lister/feature/${listingId}`,
   }),
 
   announcement: (title: string, body: string): NotificationContent => ({

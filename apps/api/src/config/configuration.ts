@@ -93,6 +93,19 @@ export const notificationsConfig = registerAs('notifications', () => {
   return { pushEnabled: e.PUSH_ENABLED, expoAccessToken: e.EXPO_ACCESS_TOKEN };
 });
 
+export const paymentsConfig = registerAs('payments', () => {
+  const e = env();
+  return {
+    driver: e.PAYMENTS_DRIVER,
+    businessName: e.PAYMENTS_BUSINESS_NAME,
+    razorpay: {
+      keyId: e.RAZORPAY_KEY_ID,
+      keySecret: e.RAZORPAY_KEY_SECRET,
+      webhookSecret: e.RAZORPAY_WEBHOOK_SECRET,
+    },
+  };
+});
+
 export const allConfigs = [
   appConfig,
   databaseConfig,
@@ -103,4 +116,5 @@ export const allConfigs = [
   otaConfig,
   geoConfig,
   notificationsConfig,
+  paymentsConfig,
 ];

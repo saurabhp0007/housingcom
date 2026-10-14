@@ -54,8 +54,9 @@ export function SearchMap({ center, filters }: SearchMapProps) {
     ...f.location,
     title:
       f.kind === 'listing'
-        ? formatRentCompact(f.rent)
+        ? `${f.isFeatured ? 'Featured · ' : ''}${formatRentCompact(f.rent)}`
         : `${f.count} places · from ${formatRentCompact(f.minRent)}`,
+    highlighted: f.kind === 'listing' && f.isFeatured,
   }));
 
   const onMarkerPress = (id: string) => {

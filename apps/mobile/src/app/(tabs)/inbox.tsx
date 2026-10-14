@@ -162,6 +162,9 @@ const NOTIFICATION_ICONS: Partial<Record<NotificationType, SymbolName>> = {
   visit_updated: { ios: 'calendar', android: 'event_available' },
   saved_search_match: { ios: 'sparkle.magnifyingglass', android: 'manage_search' },
   announcement: { ios: 'megaphone.fill', android: 'campaign' },
+  payment_received: { ios: 'star.circle.fill', android: 'workspace_premium' },
+  featured_expiring: { ios: 'clock.badge.exclamationmark', android: 'schedule' },
+  featured_ended: { ios: 'star.slash', android: 'star_border' },
 };
 
 function Updates() {

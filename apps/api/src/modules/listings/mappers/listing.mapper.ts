@@ -12,6 +12,7 @@ import type { ListingMedia } from '../entities/listing-media.entity.js';
 import type { ListingRow, NearbyPlaceRow } from '../interfaces/listings-repository.interface.js';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+const isFeatured = (until: Date | null) => !!until && until.getTime() > Date.now();
 
 /** Entity → response contracts. Injectable because media URLs depend on storage config. */
 @Injectable()
@@ -44,6 +45,7 @@ export class ListingMapper {
       publishedAt: l.publishedAt?.toISOString() ?? null,
       ratingAverage: l.ratingAverage,
       ratingCount: l.ratingCount,
+      isFeatured: isFeatured(l.featuredUntil),
       ...(distanceKm !== undefined ? { distanceKm: round2(distanceKm) } : {}),
     };
   }
@@ -58,6 +60,7 @@ export class ListingMapper {
       contactCount: l.contactCount,
       mediaCount: row.mediaCount,
       updatedAt: l.updatedAt.toISOString(),
+      featuredUntil: isFeatured(l.featuredUntil) ? l.featuredUntil!.toISOString() : null,
     };
   }
 

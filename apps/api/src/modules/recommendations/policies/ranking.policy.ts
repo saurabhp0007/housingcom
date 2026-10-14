@@ -90,3 +90,16 @@ export function buildAffinityProfile(rows: ActivityRow[]): AffinityProfile {
     budget: budgetWeight > 0 ? Math.round(budgetSum / budgetWeight) : null,
   };
 }
+
+/** Featured listings shown above organic results on the first page of a search. */
+export const FEATURED_SLOTS_IN_SEARCH = 3;
+/** Size of the "Featured in your area" section on Home. */
+export const FEATURED_SECTION_LIMIT = 10;
+/**
+ * Fair rotation: featured listings are drawn by weighted random sampling
+ * (key = random^(1/weight), Efraimidis–Spirakis), so every listing gets a share of views
+ * proportional to its weight, and none is starved. Weight = floor + relevance, where
+ * relevance mixes engagement (views/contacts) and closeness to the searched point.
+ */
+export const FEATURED_WEIGHT_FLOOR = 0.25;
+export const FEATURED_ENGAGEMENT_SHARE = 0.5;

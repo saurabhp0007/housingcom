@@ -14,7 +14,9 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+import { BannerCarousel } from '@/features/content/components/BannerCarousel';
 import { FavoriteButton } from '@/features/engagement/components/FavoriteButton';
+import { FeaturedSection } from '@/features/featured/components/FeaturedSection';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { ListingCard } from '@/features/listings/components/ListingCard';
 import { useBrowseListingsQuery } from '@/features/listings/listings.api';
@@ -91,6 +93,10 @@ export default function HomeScreen() {
             <AppText color="textSecondary">Search area, landmark, college or office</AppText>
           </HStack>
         </Pressable>
+
+        <BannerCarousel cityId={selected?.cityId ?? null} />
+
+        {selected ? <FeaturedSection lat={selected.coords.lat} lng={selected.coords.lng} /> : null}
 
         <VStack gap="md">
           <AppText variant="heading">Areas near you</AppText>

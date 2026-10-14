@@ -6,3 +6,5 @@ export * from './listing.schema.js';
 export * from './admin.schema.js';
 export * from './search.schema.js';
 export * from './engagement.schema.js';
+export * from './monetization.schema.js';
+export * from './content.schema.js';

@@ -40,6 +40,16 @@ export class ImageProcessingService {
     return { main: main.data, thumbnail, width: main.info.width, height: main.info.height };
   }
 
+  /** Home banner: wide 1200px WebP. */
+  async banner(input: Buffer): Promise<Buffer> {
+    return asInvalidMedia(
+      this.open(input)
+        .resize({ width: 1200, height: 600, fit: 'cover', withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer(),
+    );
+  }
+
   /** Verification document: readable JPEG, metadata stripped. */
   async document(input: Buffer): Promise<Buffer> {
     return asInvalidMedia(

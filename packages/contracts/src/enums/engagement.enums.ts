@@ -64,5 +64,8 @@ export const NotificationType = {
   NewMessage: 'new_message',
   SavedSearchMatch: 'saved_search_match',
   Announcement: 'announcement',
+  PaymentReceived: 'payment_received',
+  FeaturedExpiring: 'featured_expiring',
+  FeaturedEnded: 'featured_ended',
 } as const;
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];

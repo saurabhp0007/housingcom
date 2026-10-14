@@ -53,6 +53,7 @@ export function ListingCard({ listing, onPress, footer, badge, accessory }: List
           ]}
         />
         <HStack gap="xs" style={styles.overlay}>
+          {listing.isFeatured ? <Pill label="Featured" tone="featured" /> : null}
           <Pill label={TYPE_LABELS[listing.type]} tone="primary" />
           {listing.isVerifiedLister ? <Pill label="Verified" tone="verified" /> : null}
           {badge}

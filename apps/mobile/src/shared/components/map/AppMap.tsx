@@ -41,7 +41,7 @@ export function AppMap({
         markers={markers.map((m) => ({
           id: m.id,
           title: m.title,
-          tintColor: colors.primary,
+          tintColor: m.highlighted ? colors.warning : colors.primary,
           coordinates: { latitude: m.lat, longitude: m.lng },
         }))}
         properties={{ isMyLocationEnabled: showsUserLocation, selectionEnabled: false }}

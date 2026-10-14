@@ -36,6 +36,20 @@ export class CacheService {
     }
   }
 
+  /** Deletes every key starting with `prefix` (SCAN, never KEYS, so Redis isn't blocked). */
+  async delPrefix(prefix: string): Promise<void> {
+    try {
+      let cursor = '0';
+      do {
+        const [next, keys] = await this.redis.scan(cursor, 'MATCH', `${prefix}*`, 'COUNT', 200);
+        if (keys.length) await this.redis.del(...keys);
+        cursor = next;
+      } while (cursor !== '0');
+    } catch (err) {
+      this.logger.warn({ err, prefix }, 'Cache prefix delete failed');
+    }
+  }
+
   /** Read-through helper. */
   async wrap<T>(key: string, ttlSeconds: number, load: () => Promise<T>): Promise<T> {
     const cached = await this.get<T>(key);

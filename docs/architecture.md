@@ -40,6 +40,14 @@ Side effects hang off domain events: notifications are a single listener that ma
 approved, lead created, visit updated, message sent, saved-search matched…) to inbox entries and pushes.
 Push delivery and saved-search matching run on BullMQ queues, off the request path.
 
+Payments are generic: `PaymentsService` creates gateway orders for any `purpose` and emits
+`PaymentEvent.Succeeded` exactly once. The checkout result (`POST /me/payments/:id/verify`) and the webhook
+(verified with an HMAC of the raw body) both converge on a conditional `UPDATE … WHERE status <> 'paid'`.
+The featured module listens to that event and features the listing, so payments never know what was bought.
+Featured state is mirrored onto `listings.featured_until`, which is the only thing search, map and cards
+read. Expiry reminders and period ends are delayed BullMQ jobs, keyed by the period's end, so a renewal
+makes older jobs no-ops.
+
 Real time: `ChatGateway` (Socket.IO namespace `/chat`) authenticates the handshake with the access token
 and joins the socket to `user:<id>`. `RedisIoAdapter` fans emits out across API instances. Clients only
 receive over the socket; writes go through REST so they are validated, throttled and retried like any other.
@@ -70,6 +78,8 @@ packages/ui     design system (the only place that imports @expo/ui)
   messages are written straight into the RTK Query cache. `usePushNotifications` registers the Expo push
   token, refreshes badges when a push arrives, and routes taps (including cold starts) to the screen in the
   notification's `url`.
+- **Payments:** Razorpay Standard Checkout runs in a `react-native-webview` sheet (JS, so fixes ship OTA).
+  UPI intent links are handed to the OS, and the server verifies every result before anything is unlocked.
 - **Secrets:** the refresh token lives in SecureStore. The access token is memory only.
 - **OTA-friendly:** almost everything is JS. Native modules are fixed in the first binary, and feature flags
   and copy come from `/app-config`, so most fixes ship as OTA updates or without any update at all.

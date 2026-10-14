@@ -3,8 +3,10 @@ import { OnEvent } from '@nestjs/event-emitter';
 import type { VisitSlot, VisitStatus } from '@housingcom/contracts';
 import {
   EngagementEvent,
+  FeatureEvent,
   ListingEvent,
   UserAdminEvent,
+  type FeatureLifecycleEvent,
   type LeadCreatedEvent,
   type ListingStatusEvent,
   type MessageSentEvent,
@@ -109,6 +111,30 @@ export class NotificationEventsListener {
     await this.notifications.notify(
       e.userId,
       T.savedSearchMatch(e.listingId, e.label, await this.title(e.listingId)),
+    );
+  }
+
+  @OnEvent(FeatureEvent.Activated, { async: true })
+  async onFeatureActivated(e: FeatureLifecycleEvent): Promise<void> {
+    await this.notifications.notify(
+      e.ownerId,
+      T.featuredActivated(e.listingId, await this.title(e.listingId), e.endsAt, !!e.renewed),
+    );
+  }
+
+  @OnEvent(FeatureEvent.Expiring, { async: true })
+  async onFeatureExpiring(e: FeatureLifecycleEvent): Promise<void> {
+    await this.notifications.notify(
+      e.ownerId,
+      T.featuredExpiring(e.listingId, await this.title(e.listingId), e.endsAt),
+    );
+  }
+
+  @OnEvent(FeatureEvent.Ended, { async: true })
+  async onFeatureEnded(e: FeatureLifecycleEvent): Promise<void> {
+    await this.notifications.notify(
+      e.ownerId,
+      T.featuredEnded(e.listingId, await this.title(e.listingId)),
     );
   }
 

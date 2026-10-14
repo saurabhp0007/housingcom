@@ -87,6 +87,10 @@ export const baseApi = createApi({
     'Notifications',
     'AdminReports',
     'Broadcasts',
+    'Featured',
+    'FeaturedPlans',
+    'Payments',
+    'Content',
   ],
   endpoints: () => ({}),
 });

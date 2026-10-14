@@ -10,6 +10,8 @@ export interface AppMapMarker extends LatLng {
   id: string;
   /** Shown on the pin's callout, e.g. "₹9k" or "12 places". */
   title?: string;
+  /** Featured listing: drawn with the highlighted (amber star) pin. */
+  highlighted?: boolean;
 }
 
 export interface AppMapHandle {

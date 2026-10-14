@@ -39,6 +39,8 @@ export interface ListingCardResponse {
   publishedAt: string | null;
   ratingAverage: number | null;
   ratingCount: number;
+  /** Paid (or admin-pinned) placement is active. */
+  isFeatured: boolean;
   /** Present when browsing by location. */
   distanceKm?: number;
 }
@@ -79,4 +81,5 @@ export interface MyListingResponse extends ListingCardResponse {
   contactCount: number;
   mediaCount: number;
   updatedAt: string;
+  featuredUntil: string | null;
 }

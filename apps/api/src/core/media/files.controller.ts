@@ -15,9 +15,14 @@ class ListingFileParams {
   file: string;
 }
 
+class BannerFileParams {
+  @Matches(/^[0-9a-f-]{36}\.webp$/)
+  file: string;
+}
+
 /**
- * Serves public listing media when no CDN is configured. Only the `listings/` prefix is
- * reachable, and names are validated, so private files (verification documents) can never leak.
+ * Serves public listing media and banners when no CDN is configured. Only the `listings/` and
+ * `banners/` prefixes are reachable, and names are validated, so private files (verification documents) can never leak.
  */
 @ApiExcludeController()
 @Public()
@@ -36,5 +41,13 @@ export class FilesController {
       type: mimeForExtension(file.slice(file.lastIndexOf('.') + 1)),
       length: object.size,
     });
+  }
+
+  @Get('banners/:file')
+  @Header('cache-control', 'public, max-age=31536000, immutable')
+  async bannerFile(@Param() { file }: BannerFileParams): Promise<StreamableFile> {
+    const object = await this.storage.get(`banners/${file}`);
+    if (!object) throw AppException.notFound('File');
+    return new StreamableFile(object.body, { type: 'image/webp', length: object.size });
   }
 }

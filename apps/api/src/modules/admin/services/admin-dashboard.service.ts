@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ListingStatus, type AdminDashboardResponse } from '@housingcom/contracts';
+import { ListingFeaturesService } from '../../featured/services/listing-features.service.js';
+import { PaymentsService } from '../../payments/services/payments.service.js';
 import { ReportsService } from '../../reports/services/reports.service.js';
 import { ListingsStatsService } from '../../listings/services/listings-stats.service.js';
 import { UsersAdminService } from '../../users/services/users-admin.service.js';
@@ -15,15 +17,20 @@ export class AdminDashboardService {
     private readonly listings: ListingsStatsService,
     private readonly verification: VerificationService,
     private readonly reports: ReportsService,
+    private readonly features: ListingFeaturesService,
+    private readonly payments: PaymentsService,
   ) {}
 
   async summary(): Promise<AdminDashboardResponse> {
-    const [userCounts, byStatus, pendingVerifications, openReports] = await Promise.all([
-      this.users.counts(new Date(Date.now() - WEEK_MS)),
-      this.listings.countByStatus(),
-      this.verification.countPending(),
-      this.reports.countOpen(),
-    ]);
+    const [userCounts, byStatus, pendingVerifications, openReports, activeFeatured, revenue] =
+      await Promise.all([
+        this.users.counts(new Date(Date.now() - WEEK_MS)),
+        this.listings.countByStatus(),
+        this.verification.countPending(),
+        this.reports.countOpen(),
+        this.features.countActive(),
+        this.payments.revenue(),
+      ]);
     return {
       users: {
         total: userCounts.total,
@@ -38,6 +45,11 @@ export class AdminDashboardService {
       },
       verifications: { pending: pendingVerifications },
       reports: { open: openReports },
+      featured: {
+        active: activeFeatured,
+        revenueLast30DaysInr: revenue.last30DaysInr,
+        revenueTotalInr: revenue.totalInr,
+      },
     };
   }
 }

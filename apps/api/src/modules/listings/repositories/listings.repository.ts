@@ -13,6 +13,8 @@ import {
 import { buildPaginationMeta } from '../../../core/utils/pagination.util.js';
 import {
   CONTACT_POPULARITY_MULTIPLIER,
+  FEATURED_ENGAGEMENT_SHARE,
+  FEATURED_WEIGHT_FLOOR,
   FRESHNESS_DECAY_DAYS,
   POPULARITY_SATURATION,
   RATING_PRIOR,
@@ -23,6 +25,7 @@ import { ListingMedia } from '../entities/listing-media.entity.js';
 import { ListingNearbyPlace } from '../entities/listing-nearby-place.entity.js';
 import { Listing } from '../entities/listing.entity.js';
 import type {
+  FeaturedParams,
   ListingRow,
   ListingsRepository,
   MapParams,
@@ -199,6 +202,7 @@ export class TypeOrmListingsRepository implements ListingsRepository {
         .addSelect('listing.rent', 'rent')
         .addSelect('listing.type', 'type')
         .addSelect('COALESCE(lp.is_verified, false)', 'verified')
+        .addSelect('COALESCE(listing.featured_until > now(), false)', 'featured')
         .getRawMany<{
           id: string;
           lat: number;
@@ -206,6 +210,7 @@ export class TypeOrmListingsRepository implements ListingsRepository {
           rent: number;
           type: ListingType;
           verified: boolean;
+          featured: boolean;
         }>();
       return {
         total,
@@ -217,6 +222,7 @@ export class TypeOrmListingsRepository implements ListingsRepository {
           rent: Number(r.rent),
           type: r.type,
           isVerifiedLister: !!r.verified,
+          isFeatured: !!r.featured,
         })),
       };
     }
@@ -281,6 +287,37 @@ export class TypeOrmListingsRepository implements ListingsRepository {
 
   async setRating(id: string, average: number | null, count: number): Promise<void> {
     await this.listings.update({ id }, { ratingAverage: average, ratingCount: count });
+  }
+
+  async findFeatured(p: FeaturedParams): Promise<ListingRow[]> {
+    const qb = this.baseQuery()
+      .where('listing.status = :live', { live: ListingStatus.Live })
+      .andWhere('listing.featured_until > now()');
+    this.applyFilters(qb, p.filters);
+    if (p.cityId) qb.andWhere('listing.city_id = :cityId', { cityId: p.cityId });
+    if (p.areaId) qb.andWhere('listing.area_id = :areaId', { areaId: p.areaId });
+
+    const engagement = `(listing.view_count + ${CONTACT_POPULARITY_MULTIPLIER} * listing.contact_count)::float`;
+    const engagementScore = `(${engagement} / (${engagement} + ${POPULARITY_SATURATION}))`;
+    let closeness = '0.5';
+    if (p.point) {
+      qb.addSelect(`ST_Distance(listing.location, ${ORIGIN})`, 'distance_m')
+        .andWhere(`ST_DWithin(listing.location, ${ORIGIN}, :radiusM)`)
+        .setParameters({ lat: p.point.lat, lng: p.point.lng, radiusM: p.radiusKm * 1000 });
+      closeness = `GREATEST(0, 1 - ST_Distance(listing.location, ${ORIGIN}) / :radiusM)`;
+    }
+    const weight =
+      `(${FEATURED_WEIGHT_FLOOR} + ${FEATURED_ENGAGEMENT_SHARE} * ${engagementScore} ` +
+      `+ ${1 - FEATURED_ENGAGEMENT_SHARE} * ${closeness})`;
+    qb.addSelect(`POWER(random(), 1.0 / ${weight})`, 'rotation_key')
+      .orderBy('listing.featured_pinned', 'DESC')
+      .addOrderBy('rotation_key', 'DESC')
+      .limit(p.limit);
+    return this.toRows(qb);
+  }
+
+  async setFeatured(id: string, until: Date | null, pinned: boolean): Promise<void> {
+    await this.listings.update({ id }, { featuredUntil: until, featuredPinned: pinned });
   }
 
   async findNearbyPlaces(listingId: string): Promise<NearbyPlaceRow[]> {

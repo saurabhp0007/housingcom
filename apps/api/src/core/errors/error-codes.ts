@@ -35,6 +35,14 @@ export const ErrorCode = {
   VisitDateInvalid: 'VISIT_DATE_INVALID',
   SavedSearchLimitReached: 'SAVED_SEARCH_LIMIT_REACHED',
 
+  PaymentsUnavailable: 'PAYMENTS_UNAVAILABLE',
+  PaymentGatewayError: 'PAYMENT_GATEWAY_ERROR',
+  PaymentVerificationFailed: 'PAYMENT_VERIFICATION_FAILED',
+  PlanNotAvailable: 'FEATURED_PLAN_NOT_AVAILABLE',
+  FeaturedSlotsFull: 'FEATURED_SLOTS_FULL',
+  FeatureNotAllowed: 'FEATURE_NOT_ALLOWED',
+  FeatureTransitionNotAllowed: 'FEATURE_TRANSITION_NOT_ALLOWED',
+
   OtaInvalidBundle: 'OTA_INVALID_BUNDLE',
   OtaSigningUnavailable: 'OTA_SIGNING_UNAVAILABLE',
   OtaInvalidRequest: 'OTA_INVALID_REQUEST',

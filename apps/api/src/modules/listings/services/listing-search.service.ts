@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import type {
   ListingCardResponse,
   ListingFilters,
@@ -6,10 +7,21 @@ import type {
   Paginated,
 } from '@housingcom/contracts';
 import { AppException } from '../../../core/errors/app.exception.js';
+import { ListingEvent, type FeaturedImpressionsEvent } from '../../../core/events/domain-events.js';
+import {
+  FEATURED_SECTION_LIMIT,
+  FEATURED_SLOTS_IN_SEARCH,
+} from '../../recommendations/policies/ranking.policy.js';
 import { RecommendationsService } from '../../recommendations/services/recommendations.service.js';
-import type { MapQueryDto, SearchListingsQueryDto } from '../dto/search-query.dto.js';
+import type {
+  FeaturedQueryDto,
+  MapQueryDto,
+  SearchListingsQueryDto,
+} from '../dto/search-query.dto.js';
 import {
   LISTINGS_REPOSITORY,
+  type FeaturedParams,
+  type ListingRow,
   type ListingsRepository,
 } from '../interfaces/listings-repository.interface.js';
 import { ListingMapper } from '../mappers/listing.mapper.js';
@@ -24,6 +36,7 @@ export class ListingSearchService {
     @Inject(LISTINGS_REPOSITORY) private readonly listings: ListingsRepository,
     private readonly recommendations: RecommendationsService,
     private readonly mapper: ListingMapper,
+    private readonly events: EventEmitter2,
   ) {}
 
   async search(
@@ -35,21 +48,51 @@ export class ListingSearchService {
       this.recommendations.profile(viewerId),
     ]);
     const filters = this.filters(q);
-    const page = await this.listings.search({
-      filters,
+    const point =
+      q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : undefined;
+    const scope = { filters, point, radiusKm: q.radiusKm, cityId: q.cityId, areaId: q.areaId };
+    const [page, featured] = await Promise.all([
+      this.listings.search({
+        ...scope,
+        sort: q.sort,
+        page: q.page,
+        limit: q.limit,
+        weights,
+        affinity: { types: profile.types, areas: profile.areas },
+        // An explicit budget filter beats the inferred one.
+        budget: this.budgetFrom(filters) ?? profile.budget,
+      }),
+      // PRD: featured listings appear at the top of search results (first page only).
+      q.page === 1
+        ? this.featuredRows({ ...scope, limit: FEATURED_SLOTS_IN_SEARCH })
+        : Promise.resolve([]),
+    ]);
+    const featuredIds = new Set(featured.map((r) => r.listing.id));
+    const items = [...featured, ...page.items.filter((r) => !featuredIds.has(r.listing.id))];
+    return { items: items.map((r) => this.mapper.card(r)), meta: page.meta };
+  }
+
+  /** "Featured in your area" on Home. */
+  async featured(q: FeaturedQueryDto): Promise<ListingCardResponse[]> {
+    const rows = await this.featuredRows({
+      filters: {},
       point: q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : undefined,
       radiusKm: q.radiusKm,
       cityId: q.cityId,
-      areaId: q.areaId,
-      sort: q.sort,
-      page: q.page,
-      limit: q.limit,
-      weights,
-      affinity: { types: profile.types, areas: profile.areas },
-      // An explicit budget filter beats the inferred one.
-      budget: this.budgetFrom(filters) ?? profile.budget,
+      limit: FEATURED_SECTION_LIMIT,
     });
-    return { items: page.items.map((r) => this.mapper.card(r)), meta: page.meta };
+    return rows.map((r) => this.mapper.card(r));
+  }
+
+  /** Picks featured listings (fair rotation) and records the impressions for lister stats. */
+  private async featuredRows(params: FeaturedParams): Promise<ListingRow[]> {
+    const rows = await this.listings.findFeatured(params);
+    if (rows.length) {
+      this.events.emit(ListingEvent.FeaturedImpressions, {
+        listingIds: rows.map((r) => r.listing.id),
+      } satisfies FeaturedImpressionsEvent);
+    }
+    return rows;
   }
 
   map(q: MapQueryDto): Promise<MapResponse> {

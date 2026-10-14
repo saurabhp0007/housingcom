@@ -18,7 +18,12 @@ import type {
 } from '@housingcom/contracts';
 import type { AuthUser } from '../../../core/auth/auth-user.js';
 import { CurrentUser, OptionalAuth, Public } from '../../../core/http/decorators/index.js';
-import { MapQueryDto, SearchListingsQueryDto, TrackEventDto } from '../dto/search-query.dto.js';
+import {
+  FeaturedQueryDto,
+  MapQueryDto,
+  SearchListingsQueryDto,
+  TrackEventDto,
+} from '../dto/search-query.dto.js';
 import { ListingSearchService } from '../services/listing-search.service.js';
 import { ListingsQueryService } from '../services/listings-query.service.js';
 
@@ -46,6 +51,13 @@ export class ListingsController {
   @Public()
   map(@Query() q: MapQueryDto): Promise<MapResponse> {
     return this.searchService.map(q);
+  }
+
+  /** "Featured in your area": pinned first, then a fair rotation weighted by relevance. */
+  @Get('featured')
+  @Public()
+  featured(@Query() q: FeaturedQueryDto): Promise<ListingCardResponse[]> {
+    return this.searchService.featured(q);
   }
 
   @Get(':id')

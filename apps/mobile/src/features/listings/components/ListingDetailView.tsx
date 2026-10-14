@@ -78,6 +78,7 @@ export function ListingDetailView({
 
           <VStack gap="xs">
             <HStack gap="xs" wrap>
+              {l.isFeatured ? <Pill label="Featured" tone="featured" /> : null}
               {l.isVerifiedLister ? <Pill label="Verified lister" tone="verified" /> : null}
               {l.foodIncluded ? <Pill label="Food included" tone="success" /> : null}
             </HStack>

@@ -45,6 +45,15 @@ export interface MapParams {
   maxPins: number;
 }
 
+export interface FeaturedParams {
+  filters: ListingFilters;
+  point?: { lat: number; lng: number };
+  radiusKm: number;
+  cityId?: string;
+  areaId?: string;
+  limit: number;
+}
+
 export interface NearbyPlaceRow {
   category: NearbyPlaceCategory;
   name: string;
@@ -74,4 +83,9 @@ export interface ListingsRepository {
   incrementContacts(id: string): Promise<void>;
   setRating(id: string, average: number | null, count: number): Promise<void>;
   replaceNearbyPlaces(listingId: string, places: NearbyPlaceRow[]): Promise<void>;
+
+  // ── Phase 5: featured ──
+  /** Live featured listings for an area/search: pinned first, then fair weighted rotation. */
+  findFeatured(params: FeaturedParams): Promise<ListingRow[]>;
+  setFeatured(id: string, until: Date | null, pinned: boolean): Promise<void>;
 }

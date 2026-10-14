@@ -61,6 +61,14 @@ export const envSchema = z.object({
     .transform((v) => v === 'true' || v === '1'),
   EXPO_ACCESS_TOKEN: optionalString,
 
+  /** Razorpay in every real environment; `fake` simulates payments for local development and tests. */
+  PAYMENTS_DRIVER: z.enum(['razorpay', 'fake']).default('razorpay'),
+  RAZORPAY_KEY_ID: optionalString,
+  RAZORPAY_KEY_SECRET: optionalString,
+  RAZORPAY_WEBHOOK_SECRET: optionalString,
+  /** Shown on the payment sheet. */
+  PAYMENTS_BUSINESS_NAME: z.string().default('Housing'),
+
   THROTTLE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
 });
@@ -76,6 +84,23 @@ export function validateEnv(raw: Record<string, unknown>): Env {
           path: ['S3_BUCKET'],
           message: 'Required when STORAGE_DRIVER=s3',
         });
+      }
+      if (env.NODE_ENV === 'production' && env.PAYMENTS_DRIVER === 'fake') {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['PAYMENTS_DRIVER'],
+          message: 'The fake payment driver is not allowed in production',
+        });
+      }
+      if (env.PAYMENTS_DRIVER === 'razorpay' && env.NODE_ENV === 'production') {
+        for (const key of [
+          'RAZORPAY_KEY_ID',
+          'RAZORPAY_KEY_SECRET',
+          'RAZORPAY_WEBHOOK_SECRET',
+        ] as const) {
+          if (!env[key])
+            ctx.addIssue({ code: 'custom', path: [key], message: 'Required in production' });
+        }
       }
     })
     .safeParse(raw);

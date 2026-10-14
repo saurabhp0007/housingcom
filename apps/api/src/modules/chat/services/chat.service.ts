@@ -33,6 +33,7 @@ const removedListingCard = (id: string): ListingCardResponse => ({
   publishedAt: null,
   ratingAverage: null,
   ratingCount: 0,
+  isFeatured: false,
 });
 
 /**

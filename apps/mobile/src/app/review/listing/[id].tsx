@@ -8,6 +8,7 @@ import {
   useRejectListingMutation,
 } from '@/features/admin/admin.api';
 import { RejectSheet } from '@/features/admin/components/RejectSheet';
+import { PinListingSheet } from '@/features/featured/components/PinListingSheet';
 import { ListingDetailView } from '@/features/listings/components/ListingDetailView';
 import { toAppError } from '@/shared/api/api-error';
 
@@ -19,7 +20,7 @@ const PRESETS = [
   'Duplicate listing',
 ];
 
-/** Admin review of a single listing: the public page + Approve / Reject. */
+/** Admin review of a single listing: the public page + Approve / Reject, or Feature / pin when live. */
 export default function ReviewListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
@@ -27,6 +28,7 @@ export default function ReviewListingScreen() {
   const [approve, approveState] = useApproveListingMutation();
   const [reject, rejectState] = useRejectListingMutation();
   const [rejecting, setRejecting] = useState(false);
+  const [pinning, setPinning] = useState(false);
 
   const run = async (work: Promise<unknown>, done: string) => {
     try {
@@ -78,8 +80,19 @@ export default function ReviewListingScreen() {
                 />
               </View>
             </HStack>
+          ) : listing.status === 'live' ? (
+            <Button
+              label={listing.isFeatured ? 'Extend featured / pin' : 'Feature or pin'}
+              variant="tonal"
+              onPress={() => setPinning(true)}
+            />
           ) : undefined
         }
+      />
+      <PinListingSheet
+        listingId={listing.id}
+        visible={pinning}
+        onDismiss={() => setPinning(false)}
       />
       <RejectSheet
         visible={rejecting}

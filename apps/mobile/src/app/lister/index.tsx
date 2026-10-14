@@ -141,6 +141,15 @@ export default function MyListingsScreen() {
                   <AppText variant="caption" color="textSecondary">
                     {item.viewCount} views · {item.contactCount} contacts · {item.mediaCount} photos
                   </AppText>
+                  {item.featuredUntil ? (
+                    <AppText variant="caption" color="primary">
+                      Featured until{' '}
+                      {new Date(item.featuredUntil).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                    </AppText>
+                  ) : null}
                 </VStack>
               }
             />
@@ -174,6 +183,15 @@ export default function MyListingsScreen() {
                 onPress={() => {
                   setActive(null);
                   router.push(`/listing/${active.id}`);
+                }}
+              />
+            ) : null}
+            {active.status === 'live' ? (
+              <Button
+                label={active.featuredUntil ? 'Extend featured' : 'Feature this listing'}
+                onPress={() => {
+                  setActive(null);
+                  router.push(`/lister/feature/${active.id}`);
                 }}
               />
             ) : null}

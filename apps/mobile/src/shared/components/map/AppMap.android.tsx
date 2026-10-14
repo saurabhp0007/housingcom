@@ -1,3 +1,4 @@
+import { useImage } from 'expo-image';
 import { GoogleMaps } from 'expo-maps';
 import { useImperativeHandle, useRef, useState } from 'react';
 import { View } from 'react-native';
@@ -17,6 +18,8 @@ export function AppMap({
   style,
 }: AppMapProps) {
   const { scheme } = useTheme();
+  // Google Maps markers can't be tinted, so featured pins use a bundled icon.
+  const featuredPin = useImage(require('../../../../assets/map-pin-featured.png'));
   const map = useRef<GoogleMaps.MapView>(null);
   const [camera] = useState(() => ({
     coordinates: { latitude: initialCenter.lat, longitude: initialCenter.lng },
@@ -45,6 +48,7 @@ export function AppMap({
           id: m.id,
           title: m.title,
           coordinates: { latitude: m.lat, longitude: m.lng },
+          ...(m.highlighted && featuredPin ? { icon: featuredPin } : {}),
         }))}
         properties={{ isMyLocationEnabled: showsUserLocation, selectionEnabled: false }}
         uiSettings={{

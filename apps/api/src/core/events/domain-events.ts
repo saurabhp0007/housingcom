@@ -53,7 +53,13 @@ export const ListingEvent = {
   Viewed: 'listing.viewed',
   LocationChanged: 'listing.location_changed',
   Shared: 'listing.shared',
+  /** Featured listings were shown in a featured slot (search top / home section). */
+  FeaturedImpressions: 'listing.featured_impressions',
 } as const;
+
+export interface FeaturedImpressionsEvent {
+  listingIds: string[];
+}
 
 export interface ListingStatusEvent {
   listingId: string;
@@ -129,4 +135,39 @@ export interface SavedSearchMatchedEvent {
   savedSearchId: string;
   label: string;
   listingId: string;
+}
+
+export const PaymentEvent = {
+  Succeeded: 'payment.succeeded',
+  Failed: 'payment.failed',
+} as const;
+
+export interface PaymentSucceededEvent {
+  paymentId: string;
+  userId: string;
+  purpose: string;
+  referenceId: string | null;
+  amountInr: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface PaymentFailedEvent {
+  paymentId: string;
+  userId: string;
+  reason: string | null;
+}
+
+export const FeatureEvent = {
+  Activated: 'feature.activated',
+  Expiring: 'feature.expiring',
+  Ended: 'feature.ended',
+} as const;
+
+export interface FeatureLifecycleEvent {
+  featureId: string;
+  listingId: string;
+  ownerId: string;
+  endsAt: string;
+  /** Activated only: true when an existing period was extended. */
+  renewed?: boolean;
 }

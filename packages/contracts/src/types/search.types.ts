@@ -10,6 +10,7 @@ export type MapFeature =
       rent: number;
       type: ListingType;
       isVerifiedLister: boolean;
+      isFeatured: boolean;
     }
   | { kind: 'cluster'; id: string; location: Coordinates; count: number; minRent: number };
 

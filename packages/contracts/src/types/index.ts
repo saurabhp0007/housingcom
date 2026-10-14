@@ -7,3 +7,5 @@ export * from './listing.types.js';
 export * from './admin.types.js';
 export * from './search.types.js';
 export * from './engagement.types.js';
+export * from './monetization.types.js';
+export * from './content.types.js';

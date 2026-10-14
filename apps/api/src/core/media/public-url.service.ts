@@ -4,7 +4,7 @@ import { appConfig } from '../../config/configuration.js';
 import { OBJECT_STORAGE, type ObjectStorage } from '../storage/object-storage.interface.js';
 
 /** Storage keys that may be served publicly. Everything else (e.g. `private/…`) never is. */
-export const PUBLIC_KEY_PREFIXES = ['listings/'] as const;
+export const PUBLIC_KEY_PREFIXES = ['listings/', 'banners/'] as const;
 
 /** Builds client-facing URLs for stored files: CDN when configured, else the API's /files route. */
 @Injectable()

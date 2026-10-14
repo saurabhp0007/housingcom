@@ -108,6 +108,8 @@ export default function ProfileScreen() {
           </View>
         ) : null}
 
+        <Button label="Help & FAQs" variant="tonal" onPress={() => router.push('/help')} />
+
         <AppVersionCard />
 
         {isAuthenticated ? (

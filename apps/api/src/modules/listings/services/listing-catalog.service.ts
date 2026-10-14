@@ -55,4 +55,9 @@ export class ListingCatalogService {
   setRating(id: string, average: number | null, count: number): Promise<void> {
     return this.listings.setRating(id, average, count);
   }
+
+  /** Owned by the featured module: null hides the listing from featured placement. */
+  setFeatured(id: string, until: Date | null, pinned = false): Promise<void> {
+    return this.listings.setFeatured(id, until, pinned);
+  }
 }

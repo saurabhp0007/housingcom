@@ -1,4 +1,5 @@
 import { AppText, Screen, Skeleton, StatTile, VStack } from '@housingcom/ui';
+import { formatInr } from '@housingcom/utils';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useAdminDashboardQuery } from '@/features/admin/admin.api';
@@ -41,6 +42,19 @@ export default function AdminDashboardScreen() {
                 emphasis={data.reports.open > 0}
                 onPress={() => router.push('/admin/reports')}
               />
+            </Section>
+            <Section title="Featured">
+              <Tile
+                label="Featured now"
+                value={data.featured.active}
+                onPress={() => router.push('/admin/featured')}
+              />
+              <Tile
+                label="Revenue · 30 days"
+                value={formatInr(data.featured.revenueLast30DaysInr)}
+                onPress={() => router.push('/admin/payments')}
+              />
+              <Tile label="Revenue · all time" value={formatInr(data.featured.revenueTotalInr)} />
             </Section>
             <Section title="Listings">
               <Tile label="Live" value={data.listings.live} />

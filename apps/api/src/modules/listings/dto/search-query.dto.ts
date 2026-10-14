@@ -147,3 +147,26 @@ export class TrackEventDto {
   @IsIn([ListingEventType.Share])
   type: typeof ListingEventType.Share;
 }
+
+/** Home "Featured in your area". */
+export class FeaturedQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsLatitude()
+  lat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsLongitude()
+  lng?: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.5)
+  @Max(50)
+  radiusKm: number = 10;
+
+  @IsOptional()
+  @IsUUID()
+  cityId?: string;
+}

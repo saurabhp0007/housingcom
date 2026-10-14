@@ -104,4 +104,30 @@ Create the first admin after signing in once: `pnpm --filter @housingcom/api mak
 Push needs `EAS_PROJECT_ID` in the app's env and `PUSH_ENABLED=true` on the API (plus `EXPO_ACCESS_TOKEN`
 if enhanced push security is on).
 
-Next: featured plans + Razorpay.
+**Phase 5:**
+
+- **Featured plans:** admins set the price and duration per city or area, plus a limit on featured slots
+  per area. For each listing, the most specific scope with active plans is offered (area, then city,
+  then everywhere).
+- **Pay in the app:** listers pick a plan and pay through Razorpay Checkout, shown in an in-app sheet.
+  UPI apps open directly. The payment is confirmed twice: by the app's signed result and by a
+  server-to-server webhook. Both paths end in one conditional database update, so a listing is featured
+  exactly once per payment. Paying again extends the current period.
+- **Placement:** featured listings appear above the results on the first page of search (same filters
+  and area), in a "Featured in your area" section on Home, with a Featured tag, and as a highlighted pin
+  on the map. **Fair rotation** uses weighted random sampling, so every featured listing gets its share,
+  weighted by views and contacts and by closeness. Admin-pinned listings come first.
+- **Performance and expiry:** listers see impressions, views and leads for each featured period. They get
+  a reminder one day before it ends and a notice when it ends, each with a link to renew.
+- **Admin:** featured pricing, featured listings (pause, resume, remove; paused time is given back),
+  free feature or pin from a listing's page, payments, and dashboard tiles for featured listings and
+  revenue.
+- **Content:** FAQs, terms, privacy and about pages, and Home banners (with images, a city, an end date
+  and a link) are all edited in the app. Customers see them under **Help & FAQs** and on Home.
+
+Payments setup: in production set `PAYMENTS_DRIVER=razorpay`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
+and `RAZORPAY_WEBHOOK_SECRET` (the API refuses to boot without them). Then add a webhook in the Razorpay
+dashboard pointing to `<PUBLIC_BASE_URL>/api/payments/webhooks/razorpay` for the `payment.captured`,
+`order.paid` and `payment.failed` events. For local development, `PAYMENTS_DRIVER=fake` simulates payments
+(the app asks you to confirm a test payment). It is refused in production. As the PRD notes, check the
+app-store rules on selling digital promotions before launch.
