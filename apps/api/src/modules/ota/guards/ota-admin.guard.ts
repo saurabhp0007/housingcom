@@ -5,7 +5,7 @@ import { otaConfig } from '../../../config/configuration.js';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { safeEqual } from '../../../core/utils/crypto.util.js';
 
-/** Protects publish/rollout endpoints with the OTA admin token (console + CI). */
+/** Protects publish/rollout endpoints with the OTA admin token (console + CLI). */
 @Injectable()
 export class OtaAdminGuard implements CanActivate {
   constructor(@Inject(otaConfig.KEY) private readonly config: ConfigType<typeof otaConfig>) {}

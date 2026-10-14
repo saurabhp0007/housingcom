@@ -2,7 +2,7 @@
 /**
  * Records the runtime fingerprint of a native build you just shipped, so OTA updates
  * for it are allowed:   pnpm ota:record-runtime --channel production [--platform android|ios|all]
- * Run it right after `eas build` for a store/internal release (CI does this automatically).
+ * Run it right after `eas build` for a store/internal release.
  */
 import {
   CHANNELS,

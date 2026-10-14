@@ -42,7 +42,6 @@ pnpm --filter @housingcom/mobile android   # dev build (Expo UI and Firebase nee
 
 - [Architecture](docs/architecture.md): layering rules for the API and the app
 - [OTA updates](docs/ota.md): how updates are built, served, staged and rolled back
-- [CI workflows](docs/github-workflows/README.md): move into `.github/workflows/` to enable
 
 ## Phase status
 
