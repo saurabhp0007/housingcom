@@ -25,7 +25,7 @@ export default function ListingScreen() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <VStack flex={1} align="center" justify="center">
           <Loader />
         </VStack>
@@ -35,7 +35,7 @@ export default function ListingScreen() {
 
   if (isError || !listing) {
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <EmptyState
           title="Listing unavailable"
           description="It may have been filled, paused or removed."

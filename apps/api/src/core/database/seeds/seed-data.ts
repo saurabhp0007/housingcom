@@ -10,6 +10,25 @@ export interface SeedCity {
 /** Launch cities and well-known localities. Admins manage these in-app later. */
 export const SEED_CITIES: SeedCity[] = [
   {
+    name: 'Delhi',
+    state: 'Delhi',
+    center: [28.6139, 77.209],
+    areas: [
+      { name: 'Connaught Place', center: [28.6315, 77.2167], popular: true },
+      { name: 'Hauz Khas', center: [28.5494, 77.2001], popular: true },
+      { name: 'Lajpat Nagar', center: [28.5677, 77.2433], popular: true },
+      { name: 'Karol Bagh', center: [28.6519, 77.1909], popular: true },
+      { name: 'Mukherjee Nagar', center: [28.7041, 77.2025], popular: true },
+      { name: 'Kamla Nagar', center: [28.6814, 77.2058], popular: true },
+      { name: 'Saket', center: [28.5245, 77.2066] },
+      { name: 'Malviya Nagar', center: [28.5335, 77.2109] },
+      { name: 'Vasant Kunj', center: [28.5293, 77.1525] },
+      { name: 'Dwarka', center: [28.5921, 77.046] },
+      { name: 'Rajouri Garden', center: [28.6492, 77.122] },
+      { name: 'Laxmi Nagar', center: [28.6304, 77.2773] },
+    ],
+  },
+  {
     name: 'Bengaluru',
     state: 'Karnataka',
     center: [12.9716, 77.5946],

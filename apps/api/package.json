@@ -16,6 +16,7 @@
     "migration:run": "nest build && typeorm -d dist/core/database/data-source.js migration:run",
     "migration:revert": "nest build && typeorm -d dist/core/database/data-source.js migration:revert",
     "seed": "nest build && node dist/core/database/seeds/run-seeds.js",
+    "seed:demo": "nest build && node dist/core/database/seeds/seed-demo.js",
     "make-admin": "nest build && node dist/core/database/seeds/make-admin.js"
   },
   "dependencies": {

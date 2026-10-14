@@ -42,7 +42,7 @@ export default function ReviewListingScreen() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <VStack flex={1} align="center" justify="center">
           <Loader />
         </VStack>
@@ -51,7 +51,7 @@ export default function ReviewListingScreen() {
   }
   if (!listing)
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <EmptyState title="Listing not found" />
       </Screen>
     );

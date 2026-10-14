@@ -1,8 +1,16 @@
 import { UserRole } from '@housingcom/contracts';
-import { AppText, Button, ConfirmDialog, HStack, Screen, VStack, useTheme } from '@housingcom/ui';
+import {
+  AppText,
+  Button,
+  ConfirmDialog,
+  HStack,
+  Screen,
+  VStack,
+  useTheme,
+  Icon,
+} from '@housingcom/ui';
 import { maskPhone } from '@housingcom/utils';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppVersionCard } from '@/features/app-updates/components/AppVersionCard';
@@ -35,11 +43,7 @@ export default function ProfileScreen() {
         >
           {isAuthenticated && user ? (
             <HStack gap="md" align="center">
-              <SymbolView
-                name={{ ios: 'person.crop.circle.fill', android: 'account_circle' }}
-                size={48}
-                tintColor={colors.primary}
-              />
+              <Icon name="person-circle" size={48} color={colors.primary} />
               <VStack gap="xxs" flex={1}>
                 <AppText variant="heading">{user.fullName ?? 'Your account'}</AppText>
                 <AppText color="textSecondary">

@@ -1,5 +1,4 @@
-import { AppText, HIT_SLOP, HStack, useTheme } from '@housingcom/ui';
-import { SymbolView } from 'expo-symbols';
+import { AppText, HIT_SLOP, HStack, useTheme, Icon } from '@housingcom/ui';
 import { Pressable, StyleSheet } from 'react-native';
 import { useAppSelector } from '@/shared/store/hooks';
 
@@ -31,19 +30,11 @@ export function LocationPill({ onPress, detecting }: LocationPillProps) {
       ]}
     >
       <HStack gap="xs" align="center">
-        <SymbolView
-          name={{ ios: 'location.fill', android: 'location_on' }}
-          size={16}
-          tintColor={colors.primary}
-        />
+        <Icon name="location" size={16} color={colors.primary} />
         <AppText variant="bodyStrong" numberOfLines={1} style={styles.label}>
           {detecting ? 'Detecting…' : (selected?.label ?? 'Set location')}
         </AppText>
-        <SymbolView
-          name={{ ios: 'chevron.down', android: 'expand_more' }}
-          size={14}
-          tintColor={colors.textSecondary}
-        />
+        <Icon name="chevron-down" size={14} color={colors.textSecondary} />
       </HStack>
     </Pressable>
   );

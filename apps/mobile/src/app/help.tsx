@@ -9,10 +9,10 @@ import {
   Skeleton,
   VStack,
   useTheme,
+  Icon,
 } from '@housingcom/ui';
 import * as Linking from 'expo-linking';
 import { Stack, router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Platform, Pressable } from 'react-native';
 import { useAppConfigQuery } from '@/features/app-config/app-config.api';
@@ -26,9 +26,7 @@ export default function HelpScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{ title: 'Help & FAQs', headerShown: true, headerBackTitle: 'Back' }}
-      />
+      <Stack.Screen options={{ title: 'Help & FAQs' }} />
       <Screen scroll edges={['bottom']}>
         <VStack gap="lg" style={{ paddingTop: spacing.lg }}>
           {isLoading ? (
@@ -83,14 +81,10 @@ function FaqItem({ faq }: { faq: FaqResponse }) {
             <AppText variant="bodyStrong" style={{ flex: 1 }}>
               {faq.question}
             </AppText>
-            <SymbolView
-              name={
-                open
-                  ? { ios: 'chevron.up', android: 'expand_less' }
-                  : { ios: 'chevron.down', android: 'expand_more' }
-              }
+            <Icon
+              name={open ? 'chevron-up' : 'chevron-down'}
               size={16}
-              tintColor={colors.textSecondary}
+              color={colors.textSecondary}
             />
           </HStack>
           {open ? <AppText color="textSecondary">{faq.answer}</AppText> : null}

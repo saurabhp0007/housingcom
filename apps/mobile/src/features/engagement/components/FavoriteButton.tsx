@@ -1,7 +1,6 @@
-import { useTheme } from '@housingcom/ui';
+import { useTheme, Icon } from '@housingcom/ui';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet } from 'react-native';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { useFavoriteIdsQuery, useSetFavoriteMutation } from '../engagement.api';
@@ -41,16 +40,10 @@ export function FavoriteButton({ listingId, appearance = 'overlay' }: FavoriteBu
         appearance === 'overlay' && { backgroundColor: 'rgba(255,255,255,0.92)' },
       ]}
     >
-      <SymbolView
-        name={
-          saved
-            ? { ios: 'heart.fill', android: 'favorite' }
-            : { ios: 'heart', android: 'favorite_border' }
-        }
+      <Icon
+        name={saved ? 'heart' : 'heart-outline'}
         size={20}
-        tintColor={
-          saved ? colors.danger : appearance === 'overlay' ? '#1F2937' : colors.textPrimary
-        }
+        color={saved ? colors.danger : appearance === 'overlay' ? '#1F2937' : colors.textPrimary}
       />
     </Pressable>
   );

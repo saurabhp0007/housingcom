@@ -55,7 +55,7 @@ export default function ReviewVerificationScreen() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <VStack flex={1} align="center" justify="center">
           <Loader />
         </VStack>
@@ -64,7 +64,7 @@ export default function ReviewVerificationScreen() {
   }
   if (!request)
     return (
-      <Screen>
+      <Screen edges={['bottom']}>
         <EmptyState title="Request not found" />
       </Screen>
     );

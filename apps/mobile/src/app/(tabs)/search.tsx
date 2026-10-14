@@ -8,11 +8,11 @@ import {
   Skeleton,
   VStack,
   useTheme,
+  Icon,
 } from '@housingcom/ui';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -75,11 +75,7 @@ export default function SearchScreen() {
             },
           ]}
         >
-          <SymbolView
-            name={{ ios: 'magnifyingglass', android: 'search' }}
-            size={20}
-            tintColor={colors.textSecondary}
-          />
+          <Icon name="search" size={20} color={colors.textSecondary} />
           <VStack flex={1}>
             <AppText variant="bodyStrong" numberOfLines={1}>
               {center?.label ?? 'Search area, landmark, college…'}

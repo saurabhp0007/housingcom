@@ -17,9 +17,7 @@ export default function ContentPageScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{ title: data?.title ?? '', headerShown: true, headerBackTitle: 'Back' }}
-      />
+      <Stack.Screen options={{ title: data?.title ?? '' }} />
       <Screen scroll edges={['bottom']}>
         <VStack gap="md" style={{ paddingVertical: spacing.lg }}>
           {!valid ? (

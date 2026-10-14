@@ -1,7 +1,6 @@
-import { AppText, Button, HStack, Loader, VStack, useTheme } from '@housingcom/ui';
+import { AppText, Button, HStack, Loader, VStack, useTheme, Icon } from '@housingcom/ui';
 import type { Coordinates } from '@housingcom/contracts';
 import * as Location from 'expo-location';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useResolveLocationQuery } from '@/features/location/geo.api';
@@ -84,11 +83,7 @@ export function LocationPicker({
         />
         {/* Fixed centre pin; its tip marks the exact point. */}
         <View pointerEvents="none" style={styles.pinWrap}>
-          <SymbolView
-            name={{ ios: 'mappin.circle.fill', android: 'location_on' }}
-            size={40}
-            tintColor={colors.primary}
-          />
+          <Icon name="location" size={40} color={colors.primary} />
         </View>
       </View>
 

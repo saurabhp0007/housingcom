@@ -33,7 +33,7 @@ export default function MyVisitsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'My visits', headerShown: true, headerBackTitle: 'Back' }} />
+      <Stack.Screen options={{ title: 'My visits' }} />
       {isLoading ? (
         <View style={{ padding: spacing.lg }}>
           <Skeleton height={120} radius="lg" />

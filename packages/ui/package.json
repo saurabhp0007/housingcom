@@ -10,6 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@expo/vector-icons": "*",
     "@expo/ui": "*",
     "expo-haptics": "*",
     "react": "*",

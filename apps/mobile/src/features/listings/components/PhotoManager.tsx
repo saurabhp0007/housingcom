@@ -1,8 +1,17 @@
-import { AppText, Button, HStack, Pill, Sheet, VStack, useTheme, useToast } from '@housingcom/ui';
+import {
+  AppText,
+  Button,
+  HStack,
+  Pill,
+  Sheet,
+  VStack,
+  useTheme,
+  useToast,
+  Icon,
+} from '@housingcom/ui';
 import { LISTING_LIMITS, type ListingMediaResponse } from '@housingcom/contracts';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useAppDispatch } from '@/shared/store/hooks';
@@ -113,11 +122,7 @@ export function PhotoManager({ listingId, media }: PhotoManagerProps) {
           >
             {m.kind === 'video' ? (
               <View style={styles.center}>
-                <SymbolView
-                  name={{ ios: 'play.circle.fill', android: 'play_circle' }}
-                  size={32}
-                  tintColor={colors.textSecondary}
-                />
+                <Icon name="play-circle" size={32} color={colors.textSecondary} />
               </View>
             ) : (
               <Image
@@ -164,11 +169,7 @@ export function PhotoManager({ listingId, media }: PhotoManagerProps) {
               { borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border },
             ]}
           >
-            <SymbolView
-              name={{ ios: 'plus', android: 'add' }}
-              size={28}
-              tintColor={colors.primary}
-            />
+            <Icon name="add" size={28} color={colors.primary} />
             <AppText variant="caption" color="primary">
               Add
             </AppText>

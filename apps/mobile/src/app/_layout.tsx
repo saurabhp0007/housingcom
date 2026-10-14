@@ -60,15 +60,24 @@ function RootNavigator() {
       <StatusBar style="auto" />
       <Stack
         screenOptions={{
-          headerShown: false,
+          title: '',
+          headerBackTitle: 'Back',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.textPrimary,
+          headerTitleStyle: theme.typography.heading,
           contentStyle: { backgroundColor: theme.colors.background },
         }}
       >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+        {/* These draw their own chrome: tab bar, auth stack, lister/admin drawers. */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="lister" options={{ headerShown: false }} />
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
         <Stack.Screen
           name="lister-onboarding"
           options={{
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.65, 1],
             sheetGrabberVisible: true,

@@ -1,4 +1,4 @@
-import { AppText, Button, Card, HStack, Pill, VStack, useTheme } from '@housingcom/ui';
+import { AppText, Button, Card, HStack, Pill, VStack, useTheme, Icon } from '@housingcom/ui';
 import {
   AMENITY_LABELS,
   NEARBY_PLACE_LABELS,
@@ -7,7 +7,6 @@ import {
 import { formatDistance, formatInr } from '@housingcom/utils';
 import type { ReactNode } from 'react';
 import * as Linking from 'expo-linking';
-import { SymbolView } from 'expo-symbols';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppMap } from '@/shared/components/map/AppMap';
@@ -25,10 +24,10 @@ interface ListingDetailViewProps {
 }
 
 const NEARBY_SYMBOLS = {
-  metro: { ios: 'tram.fill', android: 'subway' },
-  bus_stop: { ios: 'bus.fill', android: 'directions_bus' },
-  college: { ios: 'graduationcap.fill', android: 'school' },
-  hospital: { ios: 'cross.case.fill', android: 'local_hospital' },
+  metro: 'train',
+  bus_stop: 'bus',
+  college: 'school',
+  hospital: 'medkit',
 } as const;
 
 const formatDate = (iso: string) =>
@@ -168,11 +167,7 @@ export function ListingDetailView({
               <AppText variant="heading">Nearby</AppText>
               {l.nearbyPlaces.map((p) => (
                 <HStack key={p.category} gap="sm" align="center">
-                  <SymbolView
-                    name={NEARBY_SYMBOLS[p.category]}
-                    size={20}
-                    tintColor={colors.primary}
-                  />
+                  <Icon name={NEARBY_SYMBOLS[p.category]} size={20} color={colors.primary} />
                   <VStack flex={1} gap="xxs">
                     <AppText variant="bodyStrong" numberOfLines={1}>
                       {p.name}

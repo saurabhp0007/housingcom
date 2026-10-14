@@ -1,8 +1,7 @@
-import { AppText, HStack, Pill, VStack, useTheme } from '@housingcom/ui';
+import { AppText, HStack, Pill, VStack, useTheme, Icon } from '@housingcom/ui';
 import { formatDistance, formatInr } from '@housingcom/utils';
 import type { ListingCardResponse } from '@housingcom/contracts';
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TYPE_LABELS, listingTagline } from '../listing-labels';
@@ -71,11 +70,7 @@ export function ListingCard({ listing, onPress, footer, badge, accessory }: List
           </AppText>
           {listing.distanceKm !== undefined ? (
             <HStack gap="xxs" align="center">
-              <SymbolView
-                name={{ ios: 'location', android: 'near_me' }}
-                size={12}
-                tintColor={colors.textSecondary}
-              />
+              <Icon name="navigate-outline" size={12} color={colors.textSecondary} />
               <AppText variant="caption" color="textSecondary">
                 {formatDistance(listing.distanceKm)}
               </AppText>
@@ -88,11 +83,7 @@ export function ListingCard({ listing, onPress, footer, badge, accessory }: List
           </AppText>
           {listing.ratingCount > 0 && listing.ratingAverage !== null ? (
             <HStack gap="xxs" align="center">
-              <SymbolView
-                name={{ ios: 'star.fill', android: 'star' }}
-                size={12}
-                tintColor={colors.warning}
-              />
+              <Icon name="star" size={12} color={colors.warning} />
               <AppText variant="caption">
                 {listing.ratingAverage.toFixed(1)} ({listing.ratingCount})
               </AppText>

@@ -14,13 +14,14 @@ import {
   Skeleton,
   VStack,
   useTheme,
+  Icon,
+  type IconName,
 } from '@housingcom/ui';
 import { timeAgo } from '@housingcom/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { useState, type ComponentProps } from 'react';
+import { useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { useConversationsQuery } from '@/features/chat/chat.api';
@@ -149,22 +150,20 @@ function ConversationRow({ conversation: c }: { conversation: ConversationRespon
   );
 }
 
-type SymbolName = ComponentProps<typeof SymbolView>['name'];
-
-const NOTIFICATION_ICONS: Partial<Record<NotificationType, SymbolName>> = {
-  listing_approved: { ios: 'checkmark.seal.fill', android: 'verified' },
-  listing_rejected: { ios: 'exclamationmark.triangle.fill', android: 'warning' },
-  listing_removed: { ios: 'xmark.octagon.fill', android: 'block' },
-  lister_verified: { ios: 'checkmark.shield.fill', android: 'verified_user' },
-  verification_rejected: { ios: 'exclamationmark.shield.fill', android: 'gpp_bad' },
-  new_lead: { ios: 'person.crop.circle.badge.plus', android: 'person_add' },
-  visit_requested: { ios: 'calendar.badge.plus', android: 'event' },
-  visit_updated: { ios: 'calendar', android: 'event_available' },
-  saved_search_match: { ios: 'sparkle.magnifyingglass', android: 'manage_search' },
-  announcement: { ios: 'megaphone.fill', android: 'campaign' },
-  payment_received: { ios: 'star.circle.fill', android: 'workspace_premium' },
-  featured_expiring: { ios: 'clock.badge.exclamationmark', android: 'schedule' },
-  featured_ended: { ios: 'star.slash', android: 'star_border' },
+const NOTIFICATION_ICONS: Partial<Record<NotificationType, IconName>> = {
+  listing_approved: 'checkmark-circle',
+  listing_rejected: 'alert-circle',
+  listing_removed: 'ban',
+  lister_verified: 'shield-checkmark',
+  verification_rejected: 'shield',
+  new_lead: 'person-add',
+  visit_requested: 'calendar',
+  visit_updated: 'calendar-number',
+  saved_search_match: 'sparkles',
+  announcement: 'megaphone',
+  payment_received: 'ribbon',
+  featured_expiring: 'time',
+  featured_ended: 'star-half',
 };
 
 function Updates() {
@@ -234,10 +233,10 @@ function Updates() {
             },
           ]}
         >
-          <SymbolView
-            name={NOTIFICATION_ICONS[n.type] ?? { ios: 'bell.fill', android: 'notifications' }}
+          <Icon
+            name={NOTIFICATION_ICONS[n.type] ?? 'notifications'}
             size={24}
-            tintColor={colors.primary}
+            color={colors.primary}
           />
           <VStack flex={1} gap="xxs">
             <HStack justify="space-between" gap="sm">

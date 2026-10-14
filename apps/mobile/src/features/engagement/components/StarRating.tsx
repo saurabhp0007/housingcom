@@ -1,6 +1,5 @@
-import { HStack, useTheme } from '@housingcom/ui';
+import { HStack, useTheme, Icon } from '@housingcom/ui';
 import * as Haptics from 'expo-haptics';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, View } from 'react-native';
 
 interface StarRatingProps {
@@ -16,14 +15,10 @@ export function StarRating({ value, size = 16, onChange }: StarRatingProps) {
     <HStack gap="xxs" align="center">
       {[1, 2, 3, 4, 5].map((n) => {
         const icon = (
-          <SymbolView
-            name={
-              n <= Math.round(value)
-                ? { ios: 'star.fill', android: 'star' }
-                : { ios: 'star', android: 'star_border' }
-            }
+          <Icon
+            name={n <= Math.round(value) ? 'star' : 'star-outline'}
             size={size}
-            tintColor={n <= Math.round(value) ? colors.warning : colors.textSecondary}
+            color={n <= Math.round(value) ? colors.warning : colors.textSecondary}
           />
         );
         return onChange ? (

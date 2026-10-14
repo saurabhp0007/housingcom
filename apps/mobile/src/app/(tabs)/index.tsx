@@ -8,10 +8,10 @@ import {
   Skeleton,
   VStack,
   useTheme,
+  Icon,
 } from '@housingcom/ui';
 import { formatDistance } from '@housingcom/utils';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { BannerCarousel } from '@/features/content/components/BannerCarousel';
@@ -22,8 +22,9 @@ import { ListingCard } from '@/features/listings/components/ListingCard';
 import { useBrowseListingsQuery } from '@/features/listings/listings.api';
 import { LocationPill } from '@/features/location/components/LocationPill';
 import { LocationSheet } from '@/features/location/components/LocationSheet';
-import { useNearbyAreasQuery } from '@/features/location/geo.api';
+import { useCitiesQuery, useNearbyAreasQuery } from '@/features/location/geo.api';
 import { locationSelected } from '@/features/location/location.slice';
+import type { ListingCardResponse } from '@housingcom/contracts';
 import { centerCleared } from '@/features/search/search.slice';
 import { useAppDispatch, useAppSelector } from '@/shared/store/hooks';
 
@@ -46,13 +47,22 @@ export default function HomeScreen() {
       ? {
           lat: selected.coords.lat,
           lng: selected.coords.lng,
-          radiusKm: 10,
+          // A whole city is wider than one area.
+          radiusKm: selected.areaId ? 10 : 25,
           sort: 'recommended',
           limit: 10,
         }
       : {},
     { skip: !selected },
   );
+
+  // Nothing chosen yet, or nothing close by: show what is popular everywhere instead of a blank page.
+  const nearbyEmpty = !!selected && !listingsLoading && !listings?.items.length;
+  const { data: popular, isLoading: popularLoading } = useBrowseListingsQuery(
+    { sort: 'recommended', limit: 10 },
+    { skip: !!selected && !nearbyEmpty },
+  );
+  const { data: cities } = useCitiesQuery(undefined, { skip: !!selected });
 
   const { data: nearby, isLoading } = useNearbyAreasQuery(
     selected
@@ -85,11 +95,7 @@ export default function HomeScreen() {
           ]}
         >
           <HStack gap="sm" align="center">
-            <SymbolView
-              name={{ ios: 'magnifyingglass', android: 'search' }}
-              size={20}
-              tintColor={colors.textSecondary}
-            />
+            <Icon name="search" size={20} color={colors.textSecondary} />
             <AppText color="textSecondary">Search area, landmark, college or office</AppText>
           </HStack>
         </Pressable>
@@ -99,9 +105,27 @@ export default function HomeScreen() {
         {selected ? <FeaturedSection lat={selected.coords.lat} lng={selected.coords.lng} /> : null}
 
         <VStack gap="md">
-          <AppText variant="heading">Areas near you</AppText>
+          <AppText variant="heading">{selected ? 'Areas near you' : 'Popular cities'}</AppText>
           {!selected ? (
-            <AppText color="textSecondary">Set a location to see nearby areas.</AppText>
+            <HStack gap="sm" wrap>
+              {cities?.map((city) => (
+                <Chip
+                  key={city.id}
+                  label={city.name}
+                  onPress={() =>
+                    dispatch(
+                      locationSelected({
+                        label: city.name,
+                        coords: city.center,
+                        cityId: city.id,
+                        areaId: null,
+                        source: 'manual',
+                      }),
+                    )
+                  }
+                />
+              ))}
+            </HStack>
           ) : isLoading ? (
             <HStack gap="sm" wrap>
               {[96, 120, 88, 132, 104].map((w, i) => (
@@ -132,10 +156,10 @@ export default function HomeScreen() {
           )}
         </VStack>
 
-        <VStack gap="md">
-          <HStack justify="space-between" align="center">
-            <AppText variant="heading">Recommended near you</AppText>
-            {selected ? (
+        {selected && !nearbyEmpty ? (
+          <VStack gap="md">
+            <HStack justify="space-between" align="center">
+              <AppText variant="heading">Recommended near you</AppText>
               <Button
                 label="See all"
                 variant="text"
@@ -145,37 +169,61 @@ export default function HomeScreen() {
                   router.navigate('/search');
                 }}
               />
-            ) : null}
-          </HStack>
-          {!selected ? null : listingsLoading ? (
-            <VStack gap="lg">
-              <Skeleton height={260} radius="lg" />
-              <Skeleton height={260} radius="lg" />
+            </HStack>
+            {listingsLoading ? <CardSkeletons /> : <ListingList items={listings?.items ?? []} />}
+          </VStack>
+        ) : (
+          <VStack gap="md">
+            <VStack gap="xxs">
+              <AppText variant="heading">Popular right now</AppText>
+              {nearbyEmpty ? (
+                <AppText variant="caption" color="textSecondary">
+                  Nothing near {selected.label} yet. Here is what people are viewing elsewhere.
+                </AppText>
+              ) : null}
             </VStack>
-          ) : listings?.items.length ? (
-            <VStack gap="lg">
-              {listings.items.map((l) => (
-                <ListingCard
-                  key={l.id}
-                  listing={l}
-                  onPress={() => router.push(`/listing/${l.id}`)}
-                  accessory={<FavoriteButton listingId={l.id} />}
-                />
-              ))}
-            </VStack>
-          ) : (
-            <EmptyState
-              title="No listings here yet"
-              description="Try a nearby area. New rooms, flats and PGs are added every day."
-              actionLabel="Change location"
-              onAction={() => setSheetOpen(true)}
-            />
-          )}
-        </VStack>
+            {popularLoading ? (
+              <CardSkeletons />
+            ) : popular?.items.length ? (
+              <ListingList items={popular.items} />
+            ) : (
+              <EmptyState
+                title="No listings yet"
+                description="New rooms, flats and PGs are added every day."
+                actionLabel="Change location"
+                onAction={() => setSheetOpen(true)}
+              />
+            )}
+          </VStack>
+        )}
       </VStack>
 
       <LocationSheet visible={showSheet} onDismiss={closeSheet} />
     </Screen>
+  );
+}
+
+function CardSkeletons() {
+  return (
+    <VStack gap="lg">
+      <Skeleton height={260} radius="lg" />
+      <Skeleton height={260} radius="lg" />
+    </VStack>
+  );
+}
+
+function ListingList({ items }: { items: ListingCardResponse[] }) {
+  return (
+    <VStack gap="lg">
+      {items.map((l) => (
+        <ListingCard
+          key={l.id}
+          listing={l}
+          onPress={() => router.push(`/listing/${l.id}`)}
+          accessory={<FavoriteButton listingId={l.id} />}
+        />
+      ))}
+    </VStack>
   );
 }
 

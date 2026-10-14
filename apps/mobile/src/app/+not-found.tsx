@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 
 export default function NotFoundScreen() {
   return (
-    <Screen>
+    <Screen edges={['bottom']}>
       <EmptyState
         title="Page not found"
         description="This link may be broken or the page was removed."

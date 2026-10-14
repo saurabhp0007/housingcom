@@ -1,8 +1,16 @@
 import type { MessageResponse } from '@housingcom/contracts';
-import { AppText, EmptyState, Loader, Screen, VStack, useTheme, useToast } from '@housingcom/ui';
+import {
+  AppText,
+  EmptyState,
+  Loader,
+  Screen,
+  VStack,
+  useTheme,
+  useToast,
+  Icon,
+} from '@housingcom/ui';
 import { clockTime, formatInr } from '@housingcom/utils';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSession } from '@/features/auth/hooks/useSession';
@@ -60,7 +68,7 @@ export default function ChatScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title, headerShown: true, headerBackTitle: 'Inbox' }} />
+      <Stack.Screen options={{ title, headerBackTitle: 'Inbox' }} />
       <Screen
         edges={['bottom']}
         padded={false}
@@ -95,10 +103,10 @@ export default function ChatScreen() {
               onPress={() => void submit()}
               hitSlop={8}
             >
-              <SymbolView
-                name={{ ios: 'arrow.up.circle.fill', android: 'send' }}
+              <Icon
+                name="arrow-up-circle"
                 size={34}
-                tintColor={draft.trim() ? colors.primary : colors.textSecondary}
+                color={draft.trim() ? colors.primary : colors.textSecondary}
               />
             </Pressable>
           </View>
@@ -119,11 +127,7 @@ export default function ChatScreen() {
                 {conversation.listing.areaName ? ` · ${conversation.listing.areaName}` : ''}
               </AppText>
             </VStack>
-            <SymbolView
-              name={{ ios: 'chevron.right', android: 'chevron_right' }}
-              size={16}
-              tintColor={colors.textSecondary}
-            />
+            <Icon name="chevron-forward" size={16} color={colors.textSecondary} />
           </Pressable>
         ) : null}
 

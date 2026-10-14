@@ -9,11 +9,11 @@ import {
   VStack,
   useTheme,
   useToast,
+  Icon,
 } from '@housingcom/ui';
 import { skipToken } from '@reduxjs/toolkit/query';
 import * as Crypto from 'expo-crypto';
 import { Stack, router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { useDetectLocation } from '@/features/location/hooks/useDetectLocation';
@@ -141,9 +141,9 @@ export default function SearchPlaceScreen() {
 type RowIcon = 'area' | 'place' | 'recent';
 
 const ROW_SYMBOLS = {
-  area: { ios: 'mappin.and.ellipse', android: 'location_city' },
-  place: { ios: 'building.2', android: 'apartment' },
-  recent: { ios: 'clock.arrow.circlepath', android: 'history' },
+  area: 'map-outline',
+  place: 'business-outline',
+  recent: 'time-outline',
 } as const;
 
 function Row({
@@ -167,7 +167,7 @@ function Row({
         { opacity: pressed ? 0.6 : 1, borderBottomColor: colors.border },
       ]}
     >
-      <SymbolView name={ROW_SYMBOLS[icon]} size={20} tintColor={colors.textSecondary} />
+      <Icon name={ROW_SYMBOLS[icon]} size={20} color={colors.textSecondary} />
       <VStack flex={1} gap="xxs">
         <AppText variant="bodyStrong" numberOfLines={1}>
           {title}
