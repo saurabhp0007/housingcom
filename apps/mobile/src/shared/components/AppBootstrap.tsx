@@ -8,11 +8,14 @@ import {
   registerLocationListeners,
 } from '@/features/location/location.listeners';
 import { locationHydrated, type SelectedLocation } from '@/features/location/location.slice';
+import { SEARCH_STORAGE_KEY, registerSearchListeners } from '@/features/search/search.listeners';
+import { searchHydrated, type SearchState } from '@/features/search/search.slice';
 import { persistedState } from '../storage/persisted-state';
 import { useAppDispatch } from '../store/hooks';
 
 void SplashScreen.preventAutoHideAsync();
 registerLocationListeners();
+registerSearchListeners();
 
 /** Restores persisted state + session behind the splash screen, then starts OTA checks. */
 export function AppBootstrap({ children }: PropsWithChildren) {
@@ -22,11 +25,13 @@ export function AppBootstrap({ children }: PropsWithChildren) {
 
   useEffect(() => {
     void (async () => {
-      const [location] = await Promise.all([
+      const [location, search] = await Promise.all([
         persistedState.load<SelectedLocation>(LOCATION_STORAGE_KEY),
+        persistedState.load<Pick<SearchState, 'filters' | 'sort' | 'recent'>>(SEARCH_STORAGE_KEY),
         sessionService.restore(dispatch),
       ]);
       dispatch(locationHydrated(location));
+      dispatch(searchHydrated(search));
       setReady(true);
       await SplashScreen.hideAsync();
     })();

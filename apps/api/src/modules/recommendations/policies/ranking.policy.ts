@@ -72,7 +72,11 @@ export function buildAffinityProfile(rows: ActivityRow[]): AffinityProfile {
 
   const normalise = (m: Record<string, number>) => {
     const max = Math.max(...Object.values(m), 0);
-    return max > 0 ? Object.fromEntries(Object.entries(m).map(([k, v]) => [k, Math.round((v / max) * 1000) / 1000])) : {};
+    return max > 0
+      ? Object.fromEntries(
+          Object.entries(m).map(([k, v]) => [k, Math.round((v / max) * 1000) / 1000]),
+        )
+      : {};
   };
 
   return {

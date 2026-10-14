@@ -14,3 +14,4 @@ export * from './components/EmptyState';
 export * from './components/DateField';
 export * from './components/Pill';
 export * from './components/StatTile';
+export * from './components/SliderField';

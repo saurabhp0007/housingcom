@@ -17,7 +17,9 @@ import { PlacesService } from './services/places.service.js';
       provide: PLACES_PROVIDER,
       inject: [geoConfig.KEY],
       useFactory: (config: ConfigType<typeof geoConfig>): PlacesProvider =>
-        config.googlePlacesApiKey ? new GooglePlacesProvider(config.googlePlacesApiKey) : new NoopPlacesProvider(),
+        config.googlePlacesApiKey
+          ? new GooglePlacesProvider(config.googlePlacesApiKey)
+          : new NoopPlacesProvider(),
     },
   ],
   exports: [PLACES_PROVIDER],

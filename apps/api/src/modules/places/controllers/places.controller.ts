@@ -16,13 +16,17 @@ export class PlacesController {
   /** Areas, landmarks, colleges and offices matching the text, biased to the user's location. */
   @Get('autocomplete')
   autocomplete(@Query() q: PlacesAutocompleteQueryDto): Promise<PlaceSuggestion[]> {
-    const bias = q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : undefined;
+    const bias =
+      q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : undefined;
     return this.places.autocomplete(q.q, bias, q.sessionToken);
   }
 
   /** Coordinates for a Google suggestion (our own areas already include them). */
   @Get(':placeId')
-  details(@Param('placeId') placeId: string, @Query() q: PlaceDetailsQueryDto): Promise<PlaceDetails> {
+  details(
+    @Param('placeId') placeId: string,
+    @Query() q: PlaceDetailsQueryDto,
+  ): Promise<PlaceDetails> {
     return this.places.details(placeId, q.sessionToken);
   }
 }

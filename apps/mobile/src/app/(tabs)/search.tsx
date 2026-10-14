@@ -1,67 +1,209 @@
-import { AppText, Chip, EmptyState, HStack, Screen, TextField, VStack } from '@housingcom/ui';
+import {
+  AppText,
+  Chip,
+  EmptyState,
+  HStack,
+  Loader,
+  Pill,
+  Skeleton,
+  VStack,
+  useTheme,
+} from '@housingcom/ui';
+import { skipToken } from '@reduxjs/toolkit/query';
+import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { useCityAreasQuery } from '@/features/location/geo.api';
-import { locationSelected } from '@/features/location/location.slice';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ListingCard } from '@/features/listings/components/ListingCard';
+import { FiltersSheet } from '@/features/search/components/FiltersSheet';
+import { SearchMap } from '@/features/search/components/SearchMap';
+import { SORT_LABELS, SortSheet } from '@/features/search/components/SortSheet';
+import { useSearchCenter } from '@/features/search/hooks/useSearchCenter';
+import { useSearchListingsInfiniteQuery } from '@/features/search/search.api';
+import {
+  activeFilterCount,
+  filtersApplied,
+  sortChanged,
+  viewChanged,
+} from '@/features/search/search.slice';
 import { useAppDispatch, useAppSelector } from '@/shared/store/hooks';
 
-/** Phase 1: find an area in the current city. Listing search and filters land in phase 3. */
+/** Search: place + filters + sort, as a list or a map (PRD §3 "Finding a place"). */
 export default function SearchScreen() {
+  const { colors, radius, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
-  const cityId = useAppSelector((s) => s.location.selected?.cityId ?? null);
-  const [query, setQuery] = useState('');
-  const { data: areas } = useCityAreasQuery({ cityId: cityId ?? '' }, { skip: !cityId });
+  const { filters, sort, view } = useAppSelector((s) => s.search);
+  const center = useSearchCenter();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const filterCount = activeFilterCount(filters);
 
-  const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (areas ?? []).filter((a) => !q || a.name.toLowerCase().includes(q));
-  }, [areas, query]);
+  const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    useSearchListingsInfiniteQuery(
+      center
+        ? { filters, sort, lat: center.coords.lat, lng: center.coords.lng, radiusKm: 10 }
+        : skipToken,
+    );
+  const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const total = data?.pages[0]?.meta.total ?? 0;
 
   return (
-    <Screen scroll edges={['top']}>
-      <VStack gap="xl" style={{ paddingTop: 12 }}>
-        <AppText variant="title">Search</AppText>
-        <TextField
-          label="Area or landmark"
-          placeholder="e.g. Koramangala"
-          value={query}
-          onChangeText={setQuery}
-          returnKey="search"
-          autoCapitalize="words"
-        />
-        {!cityId ? (
-          <EmptyState
-            title="Pick a city first"
-            description="Set your location on the Home tab to search areas."
+    <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: colors.background }}>
+      <VStack
+        gap="sm"
+        style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm }}
+      >
+        <Pressable
+          accessibilityRole="search"
+          accessibilityLabel="Search area, landmark, college or office"
+          onPress={() => router.push('/search-place')}
+          style={({ pressed }) => [
+            styles.bar,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderRadius: radius.pill,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}
+        >
+          <SymbolView
+            name={{ ios: 'magnifyingglass', android: 'search' }}
+            size={20}
+            tintColor={colors.textSecondary}
           />
-        ) : matches.length === 0 ? (
-          <EmptyState
-            title="No matching areas"
-            description="Try a different spelling or a nearby locality."
+          <VStack flex={1}>
+            <AppText variant="bodyStrong" numberOfLines={1}>
+              {center?.label ?? 'Search area, landmark, college…'}
+            </AppText>
+            {center?.subtitle ? (
+              <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                {center.subtitle}
+              </AppText>
+            ) : null}
+          </VStack>
+        </Pressable>
+
+        <HStack gap="sm" align="center">
+          <Chip
+            label={filterCount ? `Filters · ${filterCount}` : 'Filters'}
+            selected={filterCount > 0}
+            onPress={() => setFiltersOpen(true)}
           />
-        ) : (
-          <HStack gap="sm" wrap>
-            {matches.map((area) => (
-              <Chip
-                key={area.id}
-                label={area.name}
-                onPress={() => {
-                  dispatch(
-                    locationSelected({
-                      label: area.name,
-                      coords: area.center,
-                      cityId: area.cityId,
-                      areaId: area.id,
-                      source: 'manual',
-                    }),
-                  );
-                  router.navigate('/');
-                }}
-              />
-            ))}
-          </HStack>
-        )}
+          <Chip label={SORT_LABELS[sort]} onPress={() => setSortOpen(true)} />
+          <View style={{ flex: 1 }} />
+          <Chip
+            label="List"
+            selected={view === 'list'}
+            onPress={() => dispatch(viewChanged('list'))}
+          />
+          <Chip
+            label="Map"
+            selected={view === 'map'}
+            onPress={() => dispatch(viewChanged('map'))}
+          />
+        </HStack>
       </VStack>
-    </Screen>
+
+      {!center ? (
+        <EmptyState
+          title="Where do you want to live?"
+          description="Search an area, landmark, college or office."
+          actionLabel="Search"
+          onAction={() => router.push('/search-place')}
+        />
+      ) : view === 'map' ? (
+        <SearchMap
+          key={`${center.coords.lat},${center.coords.lng}`}
+          center={center.coords}
+          filters={filters}
+        />
+      ) : isLoading ? (
+        <VStack gap="lg" style={{ padding: spacing.lg }}>
+          <Skeleton height={260} radius="lg" />
+          <Skeleton height={260} radius="lg" />
+        </VStack>
+      ) : (
+        <FlashList
+          data={items}
+          keyExtractor={(l) => l.id}
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.lg }} />}
+          onEndReachedThreshold={0.6}
+          onEndReached={() => hasNextPage && !isFetchingNextPage && void fetchNextPage()}
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching && !isLoading && !isFetchingNextPage}
+              onRefresh={refetch}
+              tintColor={colors.primary}
+            />
+          }
+          ListHeaderComponent={
+            <HStack gap="xs" align="center" style={{ marginBottom: spacing.sm }}>
+              <AppText variant="caption" color="textSecondary">
+                {total} place{total === 1 ? '' : 's'} within 10 km
+              </AppText>
+              {sort === 'recommended' ? <Pill label="Ranked for you" tone="primary" /> : null}
+            </HStack>
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <VStack padding="lg" align="center">
+                <Loader />
+              </VStack>
+            ) : null
+          }
+          ListEmptyComponent={
+            <EmptyState
+              title="No places match"
+              description={
+                filterCount ? 'Try removing a filter or two.' : 'Try a nearby area or landmark.'
+              }
+              actionLabel={filterCount ? 'Clear filters' : 'Change place'}
+              onAction={() =>
+                filterCount ? dispatch(filtersApplied({})) : router.push('/search-place')
+              }
+            />
+          }
+          renderItem={({ item }) => (
+            <ListingCard listing={item} onPress={() => router.push(`/listing/${item.id}`)} />
+          )}
+        />
+      )}
+
+      <FiltersSheet
+        visible={filtersOpen}
+        value={filters}
+        onDismiss={() => setFiltersOpen(false)}
+        onApply={(f) => {
+          setFiltersOpen(false);
+          dispatch(filtersApplied(f));
+        }}
+      />
+      <SortSheet
+        visible={sortOpen}
+        value={sort}
+        onDismiss={() => setSortOpen(false)}
+        onChange={(s) => {
+          setSortOpen(false);
+          dispatch(sortChanged(s));
+        }}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 52,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderWidth: 1,
+  },
+});

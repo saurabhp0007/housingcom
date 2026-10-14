@@ -19,7 +19,10 @@ export class AdminRecommendationsController {
   }
 
   @Put()
-  update(@CurrentUser() admin: AuthUser, @Body() dto: RecommendationWeightsDto): Promise<RecommendationWeights> {
+  update(
+    @CurrentUser() admin: AuthUser,
+    @Body() dto: RecommendationWeightsDto,
+  ): Promise<RecommendationWeights> {
     return this.recommendations.updateWeights(dto, admin.id);
   }
 }

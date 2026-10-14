@@ -5,8 +5,14 @@ import { NearbyPlaceCategory } from '@housingcom/contracts';
 import { haversineKm } from '@housingcom/utils';
 import { QueueName } from '../../../core/queue/queue.constants.js';
 import { fromPoint } from '../../../core/utils/geo.util.js';
-import { PLACES_PROVIDER, type PlacesProvider } from '../../places/interfaces/places-provider.interface.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  PLACES_PROVIDER,
+  type PlacesProvider,
+} from '../../places/interfaces/places-provider.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 
 export const NEARBY_JOB = 'nearby-places';
 const SEARCH_RADIUS_M = 3000;
@@ -32,14 +38,18 @@ export class ListingEnrichmentService {
   async schedule(listingId: string): Promise<void> {
     if (!this.places.isEnabled) return;
     // Same job id while queued: repeated edits collapse into one lookup.
-    await this.queue.add(NEARBY_JOB, { listingId }, {
-      jobId: `nearby-${listingId}`,
-      delay: 5_000,
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 10_000 },
-      removeOnComplete: true,
-      removeOnFail: 500,
-    });
+    await this.queue.add(
+      NEARBY_JOB,
+      { listingId },
+      {
+        jobId: `nearby-${listingId}`,
+        delay: 5_000,
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 10_000 },
+        removeOnComplete: true,
+        removeOnFail: 500,
+      },
+    );
   }
 
   async computeNearby(listingId: string): Promise<void> {
@@ -51,7 +61,11 @@ export class ListingEnrichmentService {
       Object.values(NearbyPlaceCategory).map(async (category) => {
         const place = await this.places.nearest(category, point, SEARCH_RADIUS_M);
         return place
-          ? { category, name: place.name.slice(0, 160), distanceM: Math.round(haversineKm(point, place.location) * 1000) }
+          ? {
+              category,
+              name: place.name.slice(0, 160),
+              distanceM: Math.round(haversineKm(point, place.location) * 1000),
+            }
           : null;
       }),
     );

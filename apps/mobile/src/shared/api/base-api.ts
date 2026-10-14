@@ -76,6 +76,7 @@ export const baseApi = createApi({
     'AdminDashboard',
     'AdminGeo',
     'AdminOta',
+    'AdminReco',
   ],
   endpoints: () => ({}),
 });

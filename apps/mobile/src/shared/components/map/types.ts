@@ -8,6 +8,7 @@ export interface LatLng {
 
 export interface AppMapMarker extends LatLng {
   id: string;
+  /** Shown on the pin's callout, e.g. "₹9k" or "12 places". */
   title?: string;
 }
 
@@ -25,7 +26,8 @@ export interface AppMapProps {
   /** false = static preview (no gestures), e.g. on the listing page. */
   interactive?: boolean;
   showsUserLocation?: boolean;
-  /** Fires while the camera moves; debounce on the consumer side. */
-  onCameraMove?: (center: LatLng) => void;
+  /** Fires while the camera moves (centre + zoom level); debounce on the consumer side. */
+  onCameraMove?: (center: LatLng, zoom: number) => void;
+  onMarkerPress?: (markerId: string) => void;
   style?: StyleProp<ViewStyle>;
 }

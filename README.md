@@ -64,7 +64,21 @@ self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, CLI), an
   - public listing page (gallery, video, map, directions, share)
   - nearby listings on Home
 
+**Phase 3:**
+
+- **Search:** type any area, landmark, college or office. Our own areas match with typo tolerance (pg_trgm),
+  and Google Places (New) adds landmarks once `GOOGLE_PLACES_API_KEY` is set. Recent searches are remembered,
+  and keyword search covers listing text.
+- **Filters:** type, budget, sharing, gender, furnishing, food, amenities and available-by. **Sort:**
+  recommended, nearest, newest or most viewed.
+- **Map view:** listings as pins, with server-side clusters when zoomed out. Tap a pin for a preview,
+  or tap a cluster to zoom in. A list/map toggle switches between the two views.
+- **Recommendation engine:** ranks by distance, budget fit, personal taste (learned from views and shares),
+  popularity and freshness. Admins tune the weights in the app. Guests get location + popularity.
+- **Listing page:** similar places nearby, plus the nearest metro, bus stop, college and hospital
+  (looked up in the background when a listing goes live; needs the Google key).
+
 Create the first admin after signing in once: `pnpm --filter @housingcom/api make-admin --phone +91XXXXXXXXXX`.
 
-Next: search, map view, filters and recommendations → favourites, leads, chat, reviews, notifications →
+Next: favourites, leads (call / WhatsApp / chat), visit requests, reviews, reports and notifications →
 featured plans + Razorpay.

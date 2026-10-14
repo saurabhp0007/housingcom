@@ -3,7 +3,14 @@ import type { Coordinates } from '../schemas/common.schema.js';
 
 /** Map layer: individual pins when zoomed in, server-side clusters when zoomed out. */
 export type MapFeature =
-  | { kind: 'listing'; id: string; location: Coordinates; rent: number; type: ListingType; isVerifiedLister: boolean }
+  | {
+      kind: 'listing';
+      id: string;
+      location: Coordinates;
+      rent: number;
+      type: ListingType;
+      isVerifiedLister: boolean;
+    }
   | { kind: 'cluster'; id: string; location: Coordinates; count: number; minRent: number };
 
 export interface MapResponse {

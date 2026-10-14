@@ -145,7 +145,11 @@ export class TypeOrmListingsRepository implements ListingsRepository {
         qb.orderBy('listing.published_at', 'DESC', 'NULLS LAST');
         break;
       case ListingSort.MostViewed:
-        qb.orderBy('listing.view_count', 'DESC').addOrderBy('listing.published_at', 'DESC', 'NULLS LAST');
+        qb.orderBy('listing.view_count', 'DESC').addOrderBy(
+          'listing.published_at',
+          'DESC',
+          'NULLS LAST',
+        );
         break;
       case ListingSort.Recommended:
         qb.addSelect(this.scoreExpression(!!p.point, p.budget !== null), 'score')
@@ -192,7 +196,14 @@ export class TypeOrmListingsRepository implements ListingsRepository {
         .addSelect('listing.rent', 'rent')
         .addSelect('listing.type', 'type')
         .addSelect('COALESCE(lp.is_verified, false)', 'verified')
-        .getRawMany<{ id: string; lat: number; lng: number; rent: number; type: ListingType; verified: boolean }>();
+        .getRawMany<{
+          id: string;
+          lat: number;
+          lng: number;
+          rent: number;
+          type: ListingType;
+          verified: boolean;
+        }>();
       return {
         total,
         clustered: false,
@@ -217,7 +228,13 @@ export class TypeOrmListingsRepository implements ListingsRepository {
       .addSelect('ST_AsText(ST_SnapToGrid(listing.location::geometry, :cell))', 'cell_key')
       .setParameter('cell', cell)
       .groupBy('ST_SnapToGrid(listing.location::geometry, :cell)')
-      .getRawMany<{ count: string; min_rent: number; lat: number; lng: number; cell_key: string }>();
+      .getRawMany<{
+        count: string;
+        min_rent: number;
+        lat: number;
+        lng: number;
+        cell_key: string;
+      }>();
     return {
       total,
       clustered: true,
@@ -257,7 +274,11 @@ export class TypeOrmListingsRepository implements ListingsRepository {
   async replaceNearbyPlaces(listingId: string, places: NearbyPlaceRow[]): Promise<void> {
     await this.nearby.manager.transaction(async (m) => {
       await m.delete(ListingNearbyPlace, { listingId });
-      if (places.length) await m.insert(ListingNearbyPlace, places.map((p) => ({ ...p, listingId })));
+      if (places.length)
+        await m.insert(
+          ListingNearbyPlace,
+          places.map((p) => ({ ...p, listingId })),
+        );
     });
   }
 
@@ -267,15 +288,20 @@ export class TypeOrmListingsRepository implements ListingsRepository {
     if (f.maxRent !== undefined) qb.andWhere('listing.rent <= :maxRent', { maxRent: f.maxRent });
     if (f.sharing?.length) qb.andWhere('listing.sharing IN (:...sharing)', { sharing: f.sharing });
     if (f.genders?.length) qb.andWhere('listing.gender IN (:...genders)', { genders: f.genders });
-    if (f.furnishing?.length) qb.andWhere('listing.furnishing IN (:...furnishing)', { furnishing: f.furnishing });
+    if (f.furnishing?.length)
+      qb.andWhere('listing.furnishing IN (:...furnishing)', { furnishing: f.furnishing });
     if (f.foodIncluded) qb.andWhere('listing.food_included = true');
-    if (f.amenities?.length) qb.andWhere('listing.amenities @> ARRAY[:...amenities]::text[]', { amenities: f.amenities });
-    if (f.availableBy) qb.andWhere('listing.available_from <= :availableBy', { availableBy: f.availableBy });
+    if (f.amenities?.length)
+      qb.andWhere('listing.amenities @> ARRAY[:...amenities]::text[]', { amenities: f.amenities });
+    if (f.availableBy)
+      qb.andWhere('listing.available_from <= :availableBy', { availableBy: f.availableBy });
     if (f.q) qb.andWhere(`listing.search_vector @@ websearch_to_tsquery('simple', :q)`, { q: f.q });
   }
 
   private scoreExpression(hasPoint: boolean, hasBudget: boolean): string {
-    const distance = hasPoint ? `GREATEST(0, 1 - ST_Distance(listing.location, ${ORIGIN}) / :radiusM)` : '0.5';
+    const distance = hasPoint
+      ? `GREATEST(0, 1 - ST_Distance(listing.location, ${ORIGIN}) / :radiusM)`
+      : '0.5';
     const match = hasBudget ? 'EXP(-ABS(listing.rent - :budget)::float / :budget)' : '0.5';
     const personal =
       `(COALESCE((CAST(:typeAff AS jsonb) ->> listing.type)::float, 0) * 0.5 + ` +

@@ -10,6 +10,7 @@ import type {
   Platform,
   UpdateChannel,
   Paginated,
+  RecommendationWeights,
   UpsertAreaInput,
   UpsertCityInput,
   UserRole,
@@ -107,6 +108,16 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ['AdminUsers'],
     }),
 
+    // Recommendation engine
+    recommendationWeights: build.query<RecommendationWeights, void>({
+      query: () => '/admin/recommendation-settings',
+      providesTags: ['AdminReco'],
+    }),
+    updateRecommendationWeights: build.mutation<RecommendationWeights, RecommendationWeights>({
+      query: (body) => ({ url: '/admin/recommendation-settings', method: 'PUT', body }),
+      invalidatesTags: ['AdminReco', 'Listing'],
+    }),
+
     // OTA updates
     otaUpdates: build.query<
       Paginated<OtaUpdateResponse>,
@@ -170,5 +181,7 @@ export const {
   useCreateAreaMutation,
   useUpdateAreaMutation,
   useOtaUpdatesQuery,
+  useRecommendationWeightsQuery,
+  useUpdateRecommendationWeightsMutation,
   useChangeOtaUpdateMutation,
 } = adminApi;

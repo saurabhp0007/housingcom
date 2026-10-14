@@ -9,7 +9,9 @@ describe('normaliseWeights', () => {
   });
 
   it('falls back to defaults when everything is zero', () => {
-    expect(normaliseWeights({ distance: 0, match: 0, personal: 0, popularity: 0, freshness: 0 })).toEqual(DEFAULT_WEIGHTS);
+    expect(
+      normaliseWeights({ distance: 0, match: 0, personal: 0, popularity: 0, freshness: 0 }),
+    ).toEqual(DEFAULT_WEIGHTS);
   });
 
   it('ships defaults that already sum to 1', () => {

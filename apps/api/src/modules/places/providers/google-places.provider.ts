@@ -45,14 +45,27 @@ export class GooglePlacesProvider implements PlacesProvider {
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
-  async autocomplete(q: string, bias: Coordinates | undefined, sessionToken: string | undefined): Promise<PlaceSuggestion[]> {
+  async autocomplete(
+    q: string,
+    bias: Coordinates | undefined,
+    sessionToken: string | undefined,
+  ): Promise<PlaceSuggestion[]> {
     const body = {
       input: q,
       includedRegionCodes: ['in'],
       ...(sessionToken ? { sessionToken } : {}),
-      ...(bias ? { locationBias: { circle: { center: { latitude: bias.lat, longitude: bias.lng }, radius: 30000 } } } : {}),
+      ...(bias
+        ? {
+            locationBias: {
+              circle: { center: { latitude: bias.lat, longitude: bias.lng }, radius: 30000 },
+            },
+          }
+        : {}),
     };
-    const res = await this.call<AutocompleteResponse>('/places:autocomplete', { method: 'POST', body });
+    const res = await this.call<AutocompleteResponse>('/places:autocomplete', {
+      method: 'POST',
+      body,
+    });
     return (res?.suggestions ?? [])
       .map((s) => s.placePrediction)
       .filter((p): p is NonNullable<typeof p> => !!p)
@@ -80,7 +93,11 @@ export class GooglePlacesProvider implements PlacesProvider {
     };
   }
 
-  async nearest(category: NearbyPlaceCategory, point: Coordinates, radiusM: number): Promise<NearestPlace | null> {
+  async nearest(
+    category: NearbyPlaceCategory,
+    point: Coordinates,
+    radiusM: number,
+  ): Promise<NearestPlace | null> {
     const res = await this.call<{ places?: PlaceResponse[] }>('/places:searchNearby', {
       method: 'POST',
       fieldMask: 'places.displayName,places.location',
@@ -88,14 +105,24 @@ export class GooglePlacesProvider implements PlacesProvider {
         includedTypes: TYPES[category],
         maxResultCount: 1,
         rankPreference: 'DISTANCE',
-        locationRestriction: { circle: { center: { latitude: point.lat, longitude: point.lng }, radius: radiusM } },
+        locationRestriction: {
+          circle: { center: { latitude: point.lat, longitude: point.lng }, radius: radiusM },
+        },
       },
     });
     const p = res?.places?.[0];
-    return p?.location ? { name: p.displayName?.text ?? '', location: { lat: p.location.latitude, lng: p.location.longitude } } : null;
+    return p?.location
+      ? {
+          name: p.displayName?.text ?? '',
+          location: { lat: p.location.latitude, lng: p.location.longitude },
+        }
+      : null;
   }
 
-  private async call<T>(path: string, opts: { method: 'GET' | 'POST'; body?: unknown; fieldMask?: string }): Promise<T | null> {
+  private async call<T>(
+    path: string,
+    opts: { method: 'GET' | 'POST'; body?: unknown; fieldMask?: string },
+  ): Promise<T | null> {
     try {
       const res = await this.fetchImpl(`${BASE}${path}`, {
         method: opts.method,

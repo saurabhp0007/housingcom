@@ -90,7 +90,11 @@ export class ListingMapper {
       areaId: l.areaId,
       cityId: l.cityId,
       media: media.map((m) => this.media(m)),
-      nearbyPlaces: nearby.map((p) => ({ category: p.category, name: p.name, distanceKm: round2(p.distanceM / 1000) })),
+      nearbyPlaces: nearby.map((p) => ({
+        category: p.category,
+        name: p.name,
+        distanceKm: round2(p.distanceM / 1000),
+      })),
       owner: {
         id: owner.id,
         name: owner.fullName,

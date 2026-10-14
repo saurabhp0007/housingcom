@@ -8,7 +8,10 @@ import type {
 import { AppException } from '../../../core/errors/app.exception.js';
 import { RecommendationsService } from '../../recommendations/services/recommendations.service.js';
 import type { MapQueryDto, SearchListingsQueryDto } from '../dto/search-query.dto.js';
-import { LISTINGS_REPOSITORY, type ListingsRepository } from '../interfaces/listings-repository.interface.js';
+import {
+  LISTINGS_REPOSITORY,
+  type ListingsRepository,
+} from '../interfaces/listings-repository.interface.js';
 import { ListingMapper } from '../mappers/listing.mapper.js';
 
 const MAX_MAP_PINS = 200;
@@ -23,7 +26,10 @@ export class ListingSearchService {
     private readonly mapper: ListingMapper,
   ) {}
 
-  async search(q: SearchListingsQueryDto, viewerId?: string): Promise<Paginated<ListingCardResponse>> {
+  async search(
+    q: SearchListingsQueryDto,
+    viewerId?: string,
+  ): Promise<Paginated<ListingCardResponse>> {
     const [weights, profile] = await Promise.all([
       this.recommendations.rankingWeights(),
       this.recommendations.profile(viewerId),
@@ -79,7 +85,8 @@ export class ListingSearchService {
   }
 
   private budgetFrom(f: ListingFilters): number | null {
-    if (f.minRent !== undefined && f.maxRent !== undefined) return Math.round((f.minRent + f.maxRent) / 2);
+    if (f.minRent !== undefined && f.maxRent !== undefined)
+      return Math.round((f.minRent + f.maxRent) / 2);
     if (f.maxRent !== undefined) return Math.round(f.maxRent * 0.85);
     if (f.minRent !== undefined) return Math.round(f.minRent * 1.15);
     return null;

@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ListingEventType, ListingStatus, UserRole, type ListingDetailResponse } from '@housingcom/contracts';
+import {
+  ListingEventType,
+  ListingStatus,
+  UserRole,
+  type ListingDetailResponse,
+} from '@housingcom/contracts';
 import type { AuthUser } from '../../../core/auth/auth-user.js';
 import { AppException } from '../../../core/errors/app.exception.js';
 import { ListingEvent, type ListingViewedEvent } from '../../../core/events/domain-events.js';

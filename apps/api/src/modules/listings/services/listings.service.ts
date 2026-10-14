@@ -76,7 +76,9 @@ export class ListingsService {
     const columns = await this.toColumns(dto);
     await this.applyEdit(listing, userId, columns);
     if (dto.location) {
-      this.events.emit(ListingEvent.LocationChanged, { listingId: id } satisfies ListingLocationChangedEvent);
+      this.events.emit(ListingEvent.LocationChanged, {
+        listingId: id,
+      } satisfies ListingLocationChangedEvent);
     }
     return this.details.forPrivileged(id);
   }

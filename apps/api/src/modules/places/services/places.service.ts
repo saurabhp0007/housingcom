@@ -3,7 +3,10 @@ import type { Coordinates, PlaceDetails, PlaceSuggestion } from '@housingcom/con
 import { AppException } from '../../../core/errors/app.exception.js';
 import { CacheService } from '../../../core/redis/cache.service.js';
 import { fromPoint } from '../../../core/utils/geo.util.js';
-import { GEO_REPOSITORY, type GeoRepository } from '../../geo/interfaces/geo-repository.interface.js';
+import {
+  GEO_REPOSITORY,
+  type GeoRepository,
+} from '../../geo/interfaces/geo-repository.interface.js';
 import { PLACES_PROVIDER, type PlacesProvider } from '../interfaces/places-provider.interface.js';
 
 const LOCAL_LIMIT = 5;
@@ -21,7 +24,11 @@ export class PlacesService {
     private readonly cache: CacheService,
   ) {}
 
-  async autocomplete(q: string, bias?: Coordinates, sessionToken?: string): Promise<PlaceSuggestion[]> {
+  async autocomplete(
+    q: string,
+    bias?: Coordinates,
+    sessionToken?: string,
+  ): Promise<PlaceSuggestion[]> {
     const query = q.trim();
     const local = (await this.geo.searchAreas(query, LOCAL_LIMIT)).map(
       ({ area, cityName }): PlaceSuggestion => ({
@@ -42,7 +49,10 @@ export class PlacesService {
       : [];
 
     const seen = new Set(local.map((l) => l.title.toLowerCase()));
-    return [...local, ...remote.filter((r) => !seen.has(r.title.toLowerCase()))].slice(0, TOTAL_LIMIT);
+    return [...local, ...remote.filter((r) => !seen.has(r.title.toLowerCase()))].slice(
+      0,
+      TOTAL_LIMIT,
+    );
   }
 
   async details(placeId: string, sessionToken?: string): Promise<PlaceDetails> {

@@ -9,7 +9,8 @@ import {
   SharingType,
 } from '../enums/listing.enums.js';
 
-const values = <T extends Record<string, string>>(o: T) => Object.values(o) as [T[keyof T], ...T[keyof T][]];
+const values = <T extends Record<string, string>>(o: T) =>
+  Object.values(o) as [T[keyof T], ...T[keyof T][]];
 
 /** Listing filters (PRD §3 "Filters"). Shared by search, map and recommendations. */
 export const listingFiltersSchema = z.object({

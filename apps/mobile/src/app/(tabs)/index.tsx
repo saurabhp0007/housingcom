@@ -1,5 +1,6 @@
 import {
   AppText,
+  Button,
   Chip,
   EmptyState,
   HStack,
@@ -20,6 +21,7 @@ import { LocationPill } from '@/features/location/components/LocationPill';
 import { LocationSheet } from '@/features/location/components/LocationSheet';
 import { useNearbyAreasQuery } from '@/features/location/geo.api';
 import { locationSelected } from '@/features/location/location.slice';
+import { centerCleared } from '@/features/search/search.slice';
 import { useAppDispatch, useAppSelector } from '@/shared/store/hooks';
 
 export default function HomeScreen() {
@@ -42,8 +44,8 @@ export default function HomeScreen() {
           lat: selected.coords.lat,
           lng: selected.coords.lng,
           radiusKm: 10,
-          sort: 'nearest',
-          limit: 20,
+          sort: 'recommended',
+          limit: 10,
         }
       : {},
     { skip: !selected },
@@ -124,7 +126,20 @@ export default function HomeScreen() {
         </VStack>
 
         <VStack gap="md">
-          <AppText variant="heading">Near you</AppText>
+          <HStack justify="space-between" align="center">
+            <AppText variant="heading">Recommended near you</AppText>
+            {selected ? (
+              <Button
+                label="See all"
+                variant="text"
+                fullWidth={false}
+                onPress={() => {
+                  dispatch(centerCleared());
+                  router.navigate('/search');
+                }}
+              />
+            ) : null}
+          </HStack>
           {!selected ? null : listingsLoading ? (
             <VStack gap="lg">
               <Skeleton height={260} radius="lg" />

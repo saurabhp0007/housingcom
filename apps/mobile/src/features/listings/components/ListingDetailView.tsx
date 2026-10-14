@@ -1,8 +1,13 @@
 import { AppText, Button, Card, HStack, Pill, VStack, useTheme } from '@housingcom/ui';
-import { AMENITY_LABELS, type ListingDetailResponse } from '@housingcom/contracts';
-import { formatInr } from '@housingcom/utils';
+import {
+  AMENITY_LABELS,
+  NEARBY_PLACE_LABELS,
+  type ListingDetailResponse,
+} from '@housingcom/contracts';
+import { formatDistance, formatInr } from '@housingcom/utils';
 import type { ReactNode } from 'react';
 import * as Linking from 'expo-linking';
+import { SymbolView } from 'expo-symbols';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppMap } from '@/shared/components/map/AppMap';
@@ -15,7 +20,16 @@ interface ListingDetailViewProps {
   showStatus?: boolean;
   /** Pinned action bar (e.g. approve/reject, share). */
   footer?: ReactNode;
+  /** Extra sections at the end of the page (e.g. similar listings). */
+  children?: ReactNode;
 }
+
+const NEARBY_SYMBOLS = {
+  metro: { ios: 'tram.fill', android: 'subway' },
+  bus_stop: { ios: 'bus.fill', android: 'directions_bus' },
+  college: { ios: 'graduationcap.fill', android: 'school' },
+  hospital: { ios: 'cross.case.fill', android: 'local_hospital' },
+} as const;
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -33,7 +47,12 @@ function openDirections(lat: number, lng: number, label: string) {
 }
 
 /** The listing page body, shared by the public page, the lister preview and admin review. */
-export function ListingDetailView({ listing: l, showStatus, footer }: ListingDetailViewProps) {
+export function ListingDetailView({
+  listing: l,
+  showStatus,
+  footer,
+  children,
+}: ListingDetailViewProps) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const status = STATUS_META[l.status];
@@ -143,6 +162,32 @@ export function ListingDetailView({ listing: l, showStatus, footer }: ListingDet
             </VStack>
           ) : null}
 
+          {l.nearbyPlaces.length > 0 ? (
+            <VStack gap="sm">
+              <AppText variant="heading">Nearby</AppText>
+              {l.nearbyPlaces.map((p) => (
+                <HStack key={p.category} gap="sm" align="center">
+                  <SymbolView
+                    name={NEARBY_SYMBOLS[p.category]}
+                    size={20}
+                    tintColor={colors.primary}
+                  />
+                  <VStack flex={1} gap="xxs">
+                    <AppText variant="bodyStrong" numberOfLines={1}>
+                      {p.name}
+                    </AppText>
+                    <AppText variant="caption" color="textSecondary">
+                      {NEARBY_PLACE_LABELS[p.category]}
+                    </AppText>
+                  </VStack>
+                  <AppText variant="caption" color="textSecondary">
+                    {formatDistance(p.distanceKm)}
+                  </AppText>
+                </HStack>
+              ))}
+            </VStack>
+          ) : null}
+
           <Card>
             <VStack gap="xxs">
               <AppText variant="caption" color="textSecondary">
@@ -157,6 +202,7 @@ export function ListingDetailView({ listing: l, showStatus, footer }: ListingDet
               </AppText>
             </VStack>
           </Card>
+          {children}
         </VStack>
       </ScrollView>
 

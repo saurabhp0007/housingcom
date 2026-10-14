@@ -28,7 +28,11 @@ export class RecommendationsService {
 
   /** Raw (admin-entered) weights. */
   async getWeights(): Promise<RecommendationWeights> {
-    return this.cache.wrap(WEIGHTS_KEY, 300, async () => (await this.repo.getWeights()) ?? DEFAULT_WEIGHTS);
+    return this.cache.wrap(
+      WEIGHTS_KEY,
+      300,
+      async () => (await this.repo.getWeights()) ?? DEFAULT_WEIGHTS,
+    );
   }
 
   /** Weights normalised to sum to 1, as used by the ranking query. */
@@ -36,7 +40,10 @@ export class RecommendationsService {
     return normaliseWeights(await this.getWeights());
   }
 
-  async updateWeights(weights: RecommendationWeights, adminId: string): Promise<RecommendationWeights> {
+  async updateWeights(
+    weights: RecommendationWeights,
+    adminId: string,
+  ): Promise<RecommendationWeights> {
     await this.repo.saveWeights(weights, adminId);
     await this.cache.del(WEIGHTS_KEY);
     return this.getWeights();
@@ -45,7 +52,9 @@ export class RecommendationsService {
   async profile(userId: string | undefined): Promise<AffinityProfile> {
     if (!userId) return EMPTY_PROFILE;
     return this.cache.wrap(profileKey(userId), 600, async () =>
-      buildAffinityProfile(await this.repo.recentActivity(userId, ACTIVITY_WINDOW_DAYS, ACTIVITY_LIMIT)),
+      buildAffinityProfile(
+        await this.repo.recentActivity(userId, ACTIVITY_WINDOW_DAYS, ACTIVITY_LIMIT),
+      ),
     );
   }
 

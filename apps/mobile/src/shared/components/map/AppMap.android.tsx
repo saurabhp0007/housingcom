@@ -13,6 +13,7 @@ export function AppMap({
   interactive = true,
   showsUserLocation = false,
   onCameraMove,
+  onMarkerPress,
   style,
 }: AppMapProps) {
   const { scheme } = useTheme();
@@ -55,10 +56,11 @@ export function AppMap({
           rotationGesturesEnabled: false,
           tiltGesturesEnabled: false,
         }}
+        onMarkerClick={(m) => m.id && onMarkerPress?.(m.id)}
         onCameraMove={(e) =>
           e.coordinates.latitude !== undefined &&
           e.coordinates.longitude !== undefined &&
-          onCameraMove?.({ lat: e.coordinates.latitude, lng: e.coordinates.longitude })
+          onCameraMove?.({ lat: e.coordinates.latitude, lng: e.coordinates.longitude }, e.zoom)
         }
       />
     </View>

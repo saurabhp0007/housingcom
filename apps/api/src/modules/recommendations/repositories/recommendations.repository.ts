@@ -10,7 +10,8 @@ import type { ActivityRow } from '../policies/ranking.policy.js';
 @Injectable()
 export class TypeOrmRecommendationsRepository implements RecommendationsRepository {
   constructor(
-    @InjectRepository(RecommendationSettings) private readonly settings: Repository<RecommendationSettings>,
+    @InjectRepository(RecommendationSettings)
+    private readonly settings: Repository<RecommendationSettings>,
     @InjectRepository(ListingActivity) private readonly activity: Repository<ListingActivity>,
   ) {}
 

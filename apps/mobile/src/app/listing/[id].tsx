@@ -6,12 +6,15 @@ import { Share } from 'react-native';
 import { ListingDetailView } from '@/features/listings/components/ListingDetailView';
 import { useListingQuery } from '@/features/listings/listings.api';
 import { useSession } from '@/features/auth/hooks/useSession';
+import { SimilarListings } from '@/features/search/components/SimilarListings';
+import { useTrackShareMutation } from '@/features/search/search.api';
 
 /** Public listing page (deep link: housing://listing/<id>). */
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useSession();
   const { data: listing, isLoading, isError, refetch } = useListingQuery(id);
+  const [trackShare] = useTrackShareMutation();
 
   if (isLoading) {
     return (
@@ -37,10 +40,13 @@ export default function ListingScreen() {
   }
 
   const isOwner = user?.id === listing.owner.id;
-  const share = () =>
-    Share.share({
+  const share = async () => {
+    const result = await Share.share({
       message: `${listing.title} · ${formatInr(listing.rent)}/month in ${listing.areaName ?? ''}\n${Linking.createURL(`/listing/${listing.id}`)}`,
     });
+    // A completed share is a strong interest signal for recommendations.
+    if (result.action === Share.sharedAction) void trackShare(listing.id);
+  };
 
   return (
     <>
@@ -58,7 +64,9 @@ export default function ListingScreen() {
             <Button label="Share" variant="tonal" onPress={() => void share()} />
           )
         }
-      />
+      >
+        {listing.status === 'live' ? <SimilarListings listingId={listing.id} /> : null}
+      </ListingDetailView>
     </>
   );
 }

@@ -11,7 +11,10 @@ import { RecommendationsService } from './services/recommendations.service.js';
 @Module({
   imports: [TypeOrmModule.forFeature([RecommendationSettings, ListingActivity])],
   controllers: [AdminRecommendationsController],
-  providers: [RecommendationsService, { provide: RECOMMENDATIONS_REPOSITORY, useClass: TypeOrmRecommendationsRepository }],
+  providers: [
+    RecommendationsService,
+    { provide: RECOMMENDATIONS_REPOSITORY, useClass: TypeOrmRecommendationsRepository },
+  ],
   exports: [RecommendationsService],
 })
 export class RecommendationsModule {}
