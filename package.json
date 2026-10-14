@@ -1,0 +1,29 @@
+{
+  "name": "housingcom",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,html}\"",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "db:migrate": "pnpm --filter @housingcom/api migration:run",
+    "ota:publish": "node scripts/ota-publish.mjs",
+    "ota:record-runtime": "node scripts/ota-record-runtime.mjs",
+    "ota:console": "node apps/ota-console/serve.mjs"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.6.1",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.8",
+    "typescript": "~6.0.3"
+  }
+}

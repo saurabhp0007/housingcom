@@ -1,0 +1,10 @@
+{
+  "name": "@housingcom/ota-console",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Single-page console to upload, stage, pause and roll back OTA updates.",
+  "type": "module",
+  "scripts": {
+    "dev": "node serve.mjs"
+  }
+}

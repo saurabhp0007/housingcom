@@ -1,0 +1,79 @@
+import { ThemeProvider as UiThemeProvider, ToastProvider, useTheme } from '@housingcom/ui';
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider as NavigationThemeProvider,
+} from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { ForceUpdateGate } from '@/features/app-updates/components/ForceUpdateGate';
+import { AppBootstrap } from '@/shared/components/AppBootstrap';
+import { store } from '@/shared/store/store';
+
+export { ErrorBoundary } from 'expo-router';
+
+export default function RootLayout() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <KeyboardProvider>
+        <SafeAreaProvider>
+          <Provider store={store}>
+            <UiThemeProvider>
+              <ToastProvider>
+                <AppBootstrap>
+                  <ForceUpdateGate>
+                    <RootNavigator />
+                  </ForceUpdateGate>
+                </AppBootstrap>
+              </ToastProvider>
+            </UiThemeProvider>
+          </Provider>
+        </SafeAreaProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function RootNavigator() {
+  const theme = useTheme();
+  const base = theme.scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const navigationTheme = {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.textPrimary,
+      border: theme.colors.border,
+    },
+  };
+
+  return (
+    <NavigationThemeProvider value={navigationTheme}>
+      <StatusBar style="auto" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.colors.background },
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="lister-onboarding"
+          options={{
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.65, 1],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: theme.radius.xl,
+          }}
+        />
+      </Stack>
+    </NavigationThemeProvider>
+  );
+}

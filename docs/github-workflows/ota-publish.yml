@@ -1,0 +1,48 @@
+name: Publish OTA update
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Channel
+        type: choice
+        options: [production, preview, development]
+        default: preview
+      rollout:
+        description: Rollout percent
+        default: '100'
+      critical:
+        description: Apply immediately on launch
+        type: boolean
+        default: false
+      message:
+        description: Release note
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.channel }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @housingcom/contracts --filter @housingcom/utils build
+      # Fails if native code changed since the last recorded binary (needs a store build instead).
+      # Inputs go through env (never interpolated into the script) to avoid shell injection.
+      - name: Publish
+        env:
+          OTA_API_URL: ${{ secrets.OTA_API_URL }}
+          OTA_ADMIN_TOKEN: ${{ secrets.OTA_ADMIN_TOKEN }}
+          CHANNEL: ${{ inputs.channel }}
+          ROLLOUT: ${{ inputs.rollout }}
+          CRITICAL: ${{ inputs.critical }}
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          args=(--channel "$CHANNEL" --rollout "$ROLLOUT" --message "$MESSAGE")
+          if [ "$CRITICAL" = "true" ]; then args+=(--critical); fi
+          pnpm ota:publish "${args[@]}"
