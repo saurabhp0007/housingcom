@@ -16,6 +16,9 @@ import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSession } from '@/features/auth/hooks/useSession';
+import { FavoriteButton } from '@/features/engagement/components/FavoriteButton';
+import { SaveSearchSheet } from '@/features/engagement/components/SaveSearchSheet';
 import { ListingCard } from '@/features/listings/components/ListingCard';
 import { FiltersSheet } from '@/features/search/components/FiltersSheet';
 import { SearchMap } from '@/features/search/components/SearchMap';
@@ -39,6 +42,8 @@ export default function SearchScreen() {
   const center = useSearchCenter();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const { isAuthenticated } = useSession();
   const filterCount = activeFilterCount(filters);
 
   const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
@@ -94,6 +99,12 @@ export default function SearchScreen() {
             onPress={() => setFiltersOpen(true)}
           />
           <Chip label={SORT_LABELS[sort]} onPress={() => setSortOpen(true)} />
+          {center ? (
+            <Chip
+              label="Save"
+              onPress={() => (isAuthenticated ? setSaveOpen(true) : router.push('/login'))}
+            />
+          ) : null}
           <View style={{ flex: 1 }} />
           <Chip
             label="List"
@@ -169,7 +180,11 @@ export default function SearchScreen() {
             />
           }
           renderItem={({ item }) => (
-            <ListingCard listing={item} onPress={() => router.push(`/listing/${item.id}`)} />
+            <ListingCard
+              listing={item}
+              onPress={() => router.push(`/listing/${item.id}`)}
+              accessory={<FavoriteButton listingId={item.id} />}
+            />
           )}
         />
       )}
@@ -192,6 +207,14 @@ export default function SearchScreen() {
           dispatch(sortChanged(s));
         }}
       />
+      {center && isAuthenticated && saveOpen ? (
+        <SaveSearchSheet
+          center={center}
+          filters={filters}
+          visible={saveOpen}
+          onDismiss={() => setSaveOpen(false)}
+        />
+      ) : null}
     </View>
   );
 }

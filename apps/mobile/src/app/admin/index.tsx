@@ -35,6 +35,12 @@ export default function AdminDashboardScreen() {
                 emphasis={data.verifications.pending > 0}
                 onPress={() => router.push('/admin/verifications')}
               />
+              <Tile
+                label="Open reports"
+                value={data.reports.open}
+                emphasis={data.reports.open > 0}
+                onPress={() => router.push('/admin/reports')}
+              />
             </Section>
             <Section title="Listings">
               <Tile label="Live" value={data.listings.live} />

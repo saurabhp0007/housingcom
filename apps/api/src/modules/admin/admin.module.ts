@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ListingsModule } from '../listings/listings.module.js';
+import { ReportsModule } from '../reports/reports.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { VerificationModule } from '../verification/verification.module.js';
 import { AdminController } from './controllers/admin.controller.js';
@@ -11,7 +12,7 @@ import { AdminUsersService } from './services/admin-users.service.js';
  * verifications, cities/areas) live in their own modules under /admin/*.
  */
 @Module({
-  imports: [UsersModule, ListingsModule, VerificationModule],
+  imports: [UsersModule, ListingsModule, VerificationModule, ReportsModule],
   controllers: [AdminController],
   providers: [AdminDashboardService, AdminUsersService],
 })

@@ -37,6 +37,8 @@ export interface ListingCardResponse {
   coverUrl: string | null;
   isVerifiedLister: boolean;
   publishedAt: string | null;
+  ratingAverage: number | null;
+  ratingCount: number;
   /** Present when browsing by location. */
   distanceKm?: number;
 }

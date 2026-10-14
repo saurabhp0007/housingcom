@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DataSource, Repository } from 'typeorm';
-import { UserRole, type ListerType, type Paginated, type UserStatus } from '@housingcom/contracts';
+import { Brackets, DataSource, In, Repository } from 'typeorm';
+import { UserRole, UserStatus, type ListerType, type Paginated } from '@housingcom/contracts';
 import { buildPaginationMeta } from '../../../core/utils/pagination.util.js';
 import { ListerProfile } from '../entities/lister-profile.entity.js';
 import { UserDevice } from '../entities/user-device.entity.js';
 import { User } from '../entities/user.entity.js';
 import type {
   CreateUserData,
+  PushAudience,
+  PushTarget,
   UpsertDeviceData,
   UserCounts,
   UserSearchFilter,
@@ -36,7 +38,7 @@ export class TypeOrmUsersRepository implements UsersRepository {
 
   async updateProfile(
     id: string,
-    data: Partial<Pick<User, 'fullName' | 'email' | 'avatarUrl'>>,
+    data: Partial<Pick<User, 'fullName' | 'email' | 'avatarUrl' | 'preferredCityId'>>,
   ): Promise<void> {
     await this.users.update({ id }, data);
   }
@@ -58,16 +60,75 @@ export class TypeOrmUsersRepository implements UsersRepository {
   }
 
   async upsertDevice(data: UpsertDeviceData): Promise<void> {
-    await this.devices.upsert(
-      {
-        userId: data.userId,
-        deviceId: data.deviceId,
-        platform: data.platform,
-        pushToken: data.pushToken ?? null,
-        lastSeenAt: new Date(),
-      },
-      { conflictPaths: ['userId', 'deviceId'] },
-    );
+    await this.dataSource.transaction(async (manager) => {
+      if (data.pushToken) {
+        // A phone that switched accounts must stop receiving the previous user's pushes.
+        await manager
+          .createQueryBuilder()
+          .update(UserDevice)
+          .set({ pushToken: null })
+          .where('push_token = :token AND NOT (user_id = :userId AND device_id = :deviceId)', {
+            token: data.pushToken,
+            userId: data.userId,
+            deviceId: data.deviceId,
+          })
+          .execute();
+      }
+      await manager.upsert(
+        UserDevice,
+        {
+          userId: data.userId,
+          deviceId: data.deviceId,
+          platform: data.platform,
+          // Omitted (not nulled) when absent, so a login doesn't wipe the registered token.
+          ...(data.pushToken !== undefined ? { pushToken: data.pushToken } : {}),
+          lastSeenAt: new Date(),
+        },
+        { conflictPaths: ['userId', 'deviceId'] },
+      );
+    });
+  }
+
+  findManyByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return this.users.find({ where: { id: In(ids) } });
+  }
+
+  async pushTokensForUsers(userIds: string[]): Promise<string[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.devices
+      .createQueryBuilder('d')
+      .innerJoin('d.user', 'u')
+      .select('d.push_token', 'token')
+      .where('d.user_id IN (:...userIds)', { userIds })
+      .andWhere('d.push_token IS NOT NULL')
+      .andWhere('u.status = :active', { active: UserStatus.Active })
+      .getRawMany<{ token: string }>();
+    return [...new Set(rows.map((r) => r.token))];
+  }
+
+  async pushTokensPage(
+    audience: PushAudience,
+    afterDeviceId: string | null,
+    limit: number,
+  ): Promise<PushTarget[]> {
+    const qb = this.devices
+      .createQueryBuilder('d')
+      .innerJoin('d.user', 'u')
+      .select('d.id', 'deviceId')
+      .addSelect('d.push_token', 'token')
+      .where('d.push_token IS NOT NULL')
+      .andWhere('u.status = :active', { active: UserStatus.Active })
+      .orderBy('d.id', 'ASC')
+      .limit(limit);
+    if (audience.cityId) qb.andWhere('u.preferred_city_id = :cityId', { cityId: audience.cityId });
+    if (afterDeviceId) qb.andWhere('d.id > :after', { after: afterDeviceId });
+    return qb.getRawMany<PushTarget>();
+  }
+
+  async clearPushTokens(tokens: string[]): Promise<void> {
+    if (tokens.length === 0) return;
+    await this.devices.update({ pushToken: In(tokens) }, { pushToken: null });
   }
 
   async setListerVerified(userId: string, verifiedAt: Date | null): Promise<void> {

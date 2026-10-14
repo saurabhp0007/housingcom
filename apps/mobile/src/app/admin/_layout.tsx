@@ -27,8 +27,10 @@ export default function AdminLayout() {
       <Drawer.Screen name="index" options={{ title: 'Dashboard' }} />
       <Drawer.Screen name="approvals" options={{ title: 'Listing approvals' }} />
       <Drawer.Screen name="verifications" options={{ title: 'Lister verification' }} />
+      <Drawer.Screen name="reports" options={{ title: 'Reports' }} />
       <Drawer.Screen name="users" options={{ title: 'Users' }} />
       <Drawer.Screen name="cities" options={{ title: 'Cities & areas' }} />
+      <Drawer.Screen name="broadcasts" options={{ title: 'Announcements' }} />
       <Drawer.Screen name="recommendations" options={{ title: 'Recommendations' }} />
       <Drawer.Screen name="updates" options={{ title: 'App updates' }} />
     </Drawer>

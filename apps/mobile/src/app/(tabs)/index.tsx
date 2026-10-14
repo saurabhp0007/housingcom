@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+import { FavoriteButton } from '@/features/engagement/components/FavoriteButton';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { ListingCard } from '@/features/listings/components/ListingCard';
 import { useBrowseListingsQuery } from '@/features/listings/listings.api';
@@ -152,6 +153,7 @@ export default function HomeScreen() {
                   key={l.id}
                   listing={l}
                   onPress={() => router.push(`/listing/${l.id}`)}
+                  accessory={<FavoriteButton listingId={l.id} />}
                 />
               ))}
             </VStack>

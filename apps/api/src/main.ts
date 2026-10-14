@@ -7,7 +7,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
-import { appConfig } from './config/configuration.js';
+import { appConfig, redisConfig } from './config/configuration.js';
+import { RedisIoAdapter } from './core/realtime/redis-io.adapter.js';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -28,6 +29,16 @@ async function bootstrap(): Promise<void> {
     }),
   );
   app.enableShutdownHooks();
+
+  // Real-time chat: Socket.IO fanned out across instances through Redis.
+  const redis = app.get<ConfigType<typeof redisConfig>>(redisConfig.KEY);
+  const io = new RedisIoAdapter(
+    app,
+    redis.url,
+    config.corsOrigins.length ? config.corsOrigins : true,
+  );
+  await io.connect();
+  app.useWebSocketAdapter(io);
 
   if (!config.isProduction) {
     const document = SwaggerModule.createDocument(

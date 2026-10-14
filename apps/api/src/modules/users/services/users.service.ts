@@ -12,6 +12,8 @@ import type { User } from '../entities/user.entity.js';
 import {
   USERS_REPOSITORY,
   type CreateUserData,
+  type PushAudience,
+  type PushTarget,
   type UpsertDeviceData,
   type UsersRepository,
 } from '../interfaces/users-repository.interface.js';
@@ -82,5 +84,27 @@ export class UsersService {
 
   setListerVerified(userId: string, verifiedAt: Date | null): Promise<void> {
     return this.users.setListerVerified(userId, verifiedAt);
+  }
+
+  /** Users keyed by id, for other modules building people summaries in bulk. */
+  async findMany(ids: string[]): Promise<Map<string, User>> {
+    const users = await this.users.findManyByIds([...new Set(ids)]);
+    return new Map(users.map((u) => [u.id, u]));
+  }
+
+  pushTokensForUsers(userIds: string[]): Promise<string[]> {
+    return this.users.pushTokensForUsers([...new Set(userIds)]);
+  }
+
+  pushTokensPage(
+    audience: PushAudience,
+    afterDeviceId: string | null,
+    limit: number,
+  ): Promise<PushTarget[]> {
+    return this.users.pushTokensPage(audience, afterDeviceId, limit);
+  }
+
+  clearPushTokens(tokens: string[]): Promise<void> {
+    return this.users.clearPushTokens(tokens);
   }
 }

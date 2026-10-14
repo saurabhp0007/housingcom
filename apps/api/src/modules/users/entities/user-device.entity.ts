@@ -20,6 +20,7 @@ export class UserDevice extends BaseEntity {
   @Column({ type: 'varchar', length: 8 })
   platform: Platform;
 
+  @Index()
   @Column({ type: 'varchar', length: 512, nullable: true })
   pushToken: string | null;
 

@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { FavoriteButton } from '@/features/engagement/components/FavoriteButton';
 import { ListingCard } from '@/features/listings/components/ListingCard';
 import { useListingQuery } from '@/features/listings/listings.api';
 import { AppMap, type AppMapHandle, type LatLng } from '@/shared/components/map/AppMap';
@@ -111,6 +112,7 @@ function PinPreview({ listingId, onDismiss }: { listingId: string | null; onDism
         <VStack gap="md">
           <ListingCard
             listing={data}
+            accessory={<FavoriteButton listingId={data.id} />}
             onPress={() => {
               onDismiss();
               router.push(`/listing/${data.id}`);

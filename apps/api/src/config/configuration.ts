@@ -88,6 +88,11 @@ export const geoConfig = registerAs('geo', () => {
   };
 });
 
+export const notificationsConfig = registerAs('notifications', () => {
+  const e = env();
+  return { pushEnabled: e.PUSH_ENABLED, expoAccessToken: e.EXPO_ACCESS_TOKEN };
+});
+
 export const allConfigs = [
   appConfig,
   databaseConfig,
@@ -97,4 +102,5 @@ export const allConfigs = [
   storageConfig,
   otaConfig,
   geoConfig,
+  notificationsConfig,
 ];

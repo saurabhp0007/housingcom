@@ -27,6 +27,14 @@ export const ErrorCode = {
   AlreadyVerified: 'VERIFICATION_ALREADY_VERIFIED',
   VerificationNotPending: 'VERIFICATION_NOT_PENDING',
 
+  CannotEngageOwnListing: 'ENGAGEMENT_OWN_LISTING',
+  ReviewNotAllowed: 'REVIEW_NOT_ALLOWED',
+  ReportAlreadyOpen: 'REPORT_ALREADY_OPEN',
+  ReportNotOpen: 'REPORT_NOT_OPEN',
+  VisitNotPending: 'VISIT_NOT_PENDING',
+  VisitDateInvalid: 'VISIT_DATE_INVALID',
+  SavedSearchLimitReached: 'SAVED_SEARCH_LIMIT_REACHED',
+
   OtaInvalidBundle: 'OTA_INVALID_BUNDLE',
   OtaSigningUnavailable: 'OTA_SIGNING_UNAVAILABLE',
   OtaInvalidRequest: 'OTA_INVALID_REQUEST',

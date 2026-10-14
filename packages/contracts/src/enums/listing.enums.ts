@@ -26,6 +26,8 @@ export const ListingStatus = {
   Rejected: 'rejected',
   Paused: 'paused',
   Filled: 'filled',
+  /** Taken down by an admin (e.g. after a report). Hidden; the owner sees the reason. */
+  Removed: 'removed',
 } as const;
 export type ListingStatus = (typeof ListingStatus)[keyof typeof ListingStatus];
 
@@ -51,6 +53,8 @@ export const ListingAction = {
   Pause: 'pause',
   Resume: 'resume',
   MarkFilled: 'mark_filled',
+  /** Admin takedown. */
+  Remove: 'remove',
 } as const;
 export type ListingAction = (typeof ListingAction)[keyof typeof ListingAction];
 

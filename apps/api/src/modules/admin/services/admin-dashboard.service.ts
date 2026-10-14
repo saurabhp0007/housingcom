@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ListingStatus, type AdminDashboardResponse } from '@housingcom/contracts';
+import { ReportsService } from '../../reports/services/reports.service.js';
 import { ListingsStatsService } from '../../listings/services/listings-stats.service.js';
 import { UsersAdminService } from '../../users/services/users-admin.service.js';
 import { VerificationService } from '../../verification/services/verification.service.js';
@@ -13,13 +14,15 @@ export class AdminDashboardService {
     private readonly users: UsersAdminService,
     private readonly listings: ListingsStatsService,
     private readonly verification: VerificationService,
+    private readonly reports: ReportsService,
   ) {}
 
   async summary(): Promise<AdminDashboardResponse> {
-    const [userCounts, byStatus, pendingVerifications] = await Promise.all([
+    const [userCounts, byStatus, pendingVerifications, openReports] = await Promise.all([
       this.users.counts(new Date(Date.now() - WEEK_MS)),
       this.listings.countByStatus(),
       this.verification.countPending(),
+      this.reports.countOpen(),
     ]);
     return {
       users: {
@@ -34,6 +37,7 @@ export class AdminDashboardService {
         total: Object.values(byStatus).reduce((a, b) => a + (b ?? 0), 0),
       },
       verifications: { pending: pendingVerifications },
+      reports: { open: openReports },
     };
   }
 }

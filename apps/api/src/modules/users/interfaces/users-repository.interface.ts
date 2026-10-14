@@ -47,7 +47,7 @@ export interface UsersRepository {
   create(data: CreateUserData): Promise<User>;
   updateProfile(
     id: string,
-    data: Partial<Pick<User, 'fullName' | 'email' | 'avatarUrl'>>,
+    data: Partial<Pick<User, 'fullName' | 'email' | 'avatarUrl' | 'preferredCityId'>>,
   ): Promise<void>;
   touchLastLogin(id: string, at: Date): Promise<void>;
   /** Adds the lister role and creates the lister profile atomically. */
@@ -62,4 +62,24 @@ export interface UsersRepository {
   setStatus(id: string, status: UserStatus): Promise<void>;
   search(filter: UserSearchFilter): Promise<Paginated<User>>;
   counts(since: Date): Promise<UserCounts>;
+  findManyByIds(ids: string[]): Promise<User[]>;
+  /** Push tokens of the given users' devices. */
+  pushTokensForUsers(userIds: string[]): Promise<string[]>;
+  /** Keyset page of push tokens for a broadcast audience (all active users, or one city). */
+  pushTokensPage(
+    audience: PushAudience,
+    afterDeviceId: string | null,
+    limit: number,
+  ): Promise<PushTarget[]>;
+  /** Forgets tokens Expo reports as no longer registered. */
+  clearPushTokens(tokens: string[]): Promise<void>;
+}
+
+export interface PushAudience {
+  cityId: string | null;
+}
+
+export interface PushTarget {
+  deviceId: string;
+  token: string;
 }

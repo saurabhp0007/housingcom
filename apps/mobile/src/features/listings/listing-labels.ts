@@ -8,6 +8,11 @@ import type {
 } from '@housingcom/contracts';
 
 export const TYPE_LABELS: Record<ListingType, string> = { room: 'Room', flat: 'Flat', pg: 'PG' };
+export const TYPE_LABELS_PLURAL: Record<ListingType, string> = {
+  room: 'Rooms',
+  flat: 'Flats',
+  pg: 'PGs',
+};
 export const SHARING_LABELS: Record<SharingType, string> = {
   single: 'Single',
   double: 'Double',
@@ -31,6 +36,7 @@ export const STATUS_META: Record<ListingStatus, { label: string; tone: PillTone 
   rejected: { label: 'Needs changes', tone: 'danger' },
   paused: { label: 'Paused', tone: 'neutral' },
   filled: { label: 'Filled', tone: 'primary' },
+  removed: { label: 'Taken down', tone: 'danger' },
 };
 
 /** "Single sharing · Co-living · Furnished" */

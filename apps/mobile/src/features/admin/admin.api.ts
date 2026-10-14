@@ -1,5 +1,7 @@
 import type {
   AdminDashboardResponse,
+  ReportResponse,
+  ReportStatus,
   AdminUserResponse,
   AreaResponse,
   CityResponse,
@@ -159,11 +161,36 @@ export const adminApi = baseApi.injectEndpoints({
       query: ({ id, body }) => ({ url: `/admin/areas/${id}`, method: 'PATCH', body }),
       invalidatesTags: ['AdminGeo', 'Areas'],
     }),
+
+    // Reports
+    adminReports: build.query<Paginated<ReportResponse>, { status: ReportStatus }>({
+      query: (params) => ({ url: '/admin/reports', params: { ...params, limit: 50 } }),
+      providesTags: ['AdminReports'],
+    }),
+    dismissReport: build.mutation<ReportResponse, { id: string; note?: string }>({
+      query: ({ id, note }) => ({
+        url: `/admin/reports/${id}/dismiss`,
+        method: 'POST',
+        body: { note },
+      }),
+      invalidatesTags: ['AdminReports', 'AdminDashboard'],
+    }),
+    removeReportedListing: build.mutation<ReportResponse, { id: string; reason: string }>({
+      query: ({ id, reason }) => ({
+        url: `/admin/reports/${id}/remove-listing`,
+        method: 'POST',
+        body: { reason },
+      }),
+      invalidatesTags: ['AdminReports', 'AdminDashboard', 'Listing'],
+    }),
   }),
 });
 
 export const {
   useAdminDashboardQuery,
+  useAdminReportsQuery,
+  useDismissReportMutation,
+  useRemoveReportedListingMutation,
   useModerationQueueQuery,
   useAdminListingQuery,
   useApproveListingMutation,

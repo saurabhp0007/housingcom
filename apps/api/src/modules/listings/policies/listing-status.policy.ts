@@ -21,6 +21,7 @@ const goLiveOrReview = (ctx: TransitionContext) =>
  *   pending_approval ──approve──▶ live      ──reject(reason)──▶ rejected
  *   rejected ──submit──▶ (verified ? live : pending_approval)   (lister fixes and resubmits)
  *   live ⇄ paused (pause / resume)          live | paused ──mark_filled──▶ filled ──resume──▶ live
+ *   any ──remove(reason, admin)──▶ removed ──submit──▶ pending_approval (always re-reviewed)
  *   edit: allowed except while filled; editing a live/paused listing as an unverified lister
  *         sends it back to review so unreviewed content never goes live.
  */
@@ -34,6 +35,8 @@ export function transition(
 
   switch (action) {
     case A.Submit:
+      // A removed listing can be fixed and resubmitted, but always goes through review again.
+      if (current === S.Removed) return to(S.PendingApproval);
       if (current === S.Draft || current === S.Rejected) return to(goLiveOrReview(ctx));
       return deny('Only drafts or rejected listings can be submitted');
 
@@ -65,6 +68,9 @@ export function transition(
       return current === S.Live || current === S.Paused
         ? to(S.Filled)
         : deny('Only live or paused listings can be marked filled');
+
+    case A.Remove:
+      return current === S.Removed ? deny('Listing is already removed') : to(S.Removed);
   }
 }
 

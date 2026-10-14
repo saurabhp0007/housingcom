@@ -15,6 +15,9 @@ import {
   CONTACT_POPULARITY_MULTIPLIER,
   FRESHNESS_DECAY_DAYS,
   POPULARITY_SATURATION,
+  RATING_PRIOR,
+  RATING_PRIOR_COUNT,
+  RATING_SHARE_OF_POPULARITY,
 } from '../../recommendations/policies/ranking.policy.js';
 import { ListingMedia } from '../entities/listing-media.entity.js';
 import { ListingNearbyPlace } from '../entities/listing-nearby-place.entity.js';
@@ -267,6 +270,19 @@ export class TypeOrmListingsRepository implements ListingsRepository {
     return this.toRows(qb);
   }
 
+  findRowsByIds(ids: string[]): Promise<ListingRow[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return this.toRows(this.baseQuery().where('listing.id IN (:...ids)', { ids }));
+  }
+
+  async incrementContacts(id: string): Promise<void> {
+    await this.listings.increment({ id }, 'contactCount', 1);
+  }
+
+  async setRating(id: string, average: number | null, count: number): Promise<void> {
+    await this.listings.update({ id }, { ratingAverage: average, ratingCount: count });
+  }
+
   async findNearbyPlaces(listingId: string): Promise<NearbyPlaceRow[]> {
     return this.nearby.find({ where: { listingId }, order: { distanceM: 'ASC' } });
   }
@@ -307,7 +323,12 @@ export class TypeOrmListingsRepository implements ListingsRepository {
       `(COALESCE((CAST(:typeAff AS jsonb) ->> listing.type)::float, 0) * 0.5 + ` +
       `COALESCE((CAST(:areaAff AS jsonb) ->> listing.area_id::text)::float, 0) * 0.5)`;
     const engagement = `(listing.view_count + ${CONTACT_POPULARITY_MULTIPLIER} * listing.contact_count)::float`;
-    const popularity = `(${engagement} / (${engagement} + ${POPULARITY_SATURATION}))`;
+    const engagementScore = `(${engagement} / (${engagement} + ${POPULARITY_SATURATION}))`;
+    // Bayesian average: few reviews pull towards the prior, so one 5★ review can't dominate.
+    const ratingScore =
+      `((COALESCE(listing.rating_average, 0) * listing.rating_count + ${RATING_PRIOR} * ${RATING_PRIOR_COUNT}) ` +
+      `/ (listing.rating_count + ${RATING_PRIOR_COUNT}) / 5.0)`;
+    const popularity = `(${1 - RATING_SHARE_OF_POPULARITY} * ${engagementScore} + ${RATING_SHARE_OF_POPULARITY} * ${ratingScore})`;
     const freshness = `EXP(-EXTRACT(EPOCH FROM (now() - COALESCE(listing.published_at, listing.created_at))) / 86400.0 / ${FRESHNESS_DECAY_DAYS})`;
     return `(:wD * ${distance} + :wM * ${match} + :wP * ${personal} + :wPop * ${popularity} + :wF * ${freshness})`;
   }

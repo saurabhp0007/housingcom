@@ -80,6 +80,24 @@ export class ListingModerationService {
     return this.details.forPrivileged(id);
   }
 
+  /** Admin takedown (e.g. after a report). The owner sees the reason and may fix + resubmit. */
+  async remove(adminId: string, id: string, reason: string): Promise<void> {
+    const listing = await this.load(id);
+    const result = transition(listing.status, ListingAction.Remove, { isVerifiedLister: false });
+    if (!result.allowed)
+      throw AppException.conflict(ErrorCode.ListingTransitionNotAllowed, result.reason);
+
+    await this.listings.update(id, { status: ListingStatus.Removed, rejectionReason: reason });
+    this.emit(ListingEvent.Removed, {
+      listingId: id,
+      ownerId: listing.ownerId,
+      from: listing.status,
+      to: ListingStatus.Removed,
+      actorId: adminId,
+      reason,
+    });
+  }
+
   private async load(id: string) {
     const listing = await this.listings.findById(id);
     if (!listing) throw AppException.notFound('Listing');

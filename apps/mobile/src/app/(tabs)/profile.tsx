@@ -63,6 +63,10 @@ export default function ProfileScreen() {
           )}
         </View>
 
+        {isAuthenticated ? (
+          <Button label="My visits" variant="tonal" onPress={() => router.push('/visits')} />
+        ) : null}
+
         {isLister || isAdmin ? (
           <VStack gap="sm">
             {isLister ? (

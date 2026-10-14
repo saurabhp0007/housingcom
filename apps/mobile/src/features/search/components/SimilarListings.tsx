@@ -1,6 +1,7 @@
 import { AppText, VStack, useTheme } from '@housingcom/ui';
 import { router } from 'expo-router';
 import { FlatList, View } from 'react-native';
+import { FavoriteButton } from '@/features/engagement/components/FavoriteButton';
 import { ListingCard } from '@/features/listings/components/ListingCard';
 import { useSimilarListingsQuery } from '../search.api';
 
@@ -21,7 +22,11 @@ export function SimilarListings({ listingId }: { listingId: string }) {
         contentContainerStyle={{ gap: spacing.md }}
         renderItem={({ item }) => (
           <View style={{ width: 260 }}>
-            <ListingCard listing={item} onPress={() => router.push(`/listing/${item.id}`)} />
+            <ListingCard
+              listing={item}
+              onPress={() => router.push(`/listing/${item.id}`)}
+              accessory={<FavoriteButton listingId={item.id} />}
+            />
           </View>
         )}
       />

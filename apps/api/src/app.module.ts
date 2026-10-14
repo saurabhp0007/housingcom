@@ -18,12 +18,19 @@ import { StorageModule } from './core/storage/storage.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AppConfigModule } from './modules/app-config/app-config.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
+import { FavoritesModule } from './modules/favorites/favorites.module.js';
 import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { LeadsModule } from './modules/leads/leads.module.js';
 import { ListingsModule } from './modules/listings/listings.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { OtaModule } from './modules/ota/ota.module.js';
 import { PlacesModule } from './modules/places/places.module.js';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module.js';
+import { ReportsModule } from './modules/reports/reports.module.js';
+import { ReviewsModule } from './modules/reviews/reviews.module.js';
+import { SavedSearchesModule } from './modules/saved-searches/saved-searches.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VerificationModule } from './modules/verification/verification.module.js';
 
@@ -82,6 +89,13 @@ import { VerificationModule } from './modules/verification/verification.module.j
     AdminModule,
     PlacesModule,
     RecommendationsModule,
+    FavoritesModule,
+    SavedSearchesModule,
+    ChatModule,
+    LeadsModule,
+    ReviewsModule,
+    ReportsModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

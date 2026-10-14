@@ -6,3 +6,4 @@ export * from './ota.types.js';
 export * from './listing.types.js';
 export * from './admin.types.js';
 export * from './search.types.js';
+export * from './engagement.types.js';

@@ -21,6 +21,7 @@ import { ListingMapper } from './mappers/listing.mapper.js';
 import { TypeOrmListingMediaRepository } from './repositories/listing-media.repository.js';
 import { TypeOrmListingsRepository } from './repositories/listings.repository.js';
 import { ListingEnrichmentProcessor } from './processors/listing-enrichment.processor.js';
+import { ListingCatalogService } from './services/listing-catalog.service.js';
 import { ListingDetailsService } from './services/listing-details.service.js';
 import { ListingEnrichmentService } from './services/listing-enrichment.service.js';
 import { ListingMediaService } from './services/listing-media.service.js';
@@ -52,10 +53,11 @@ import { ListingsService } from './services/listings.service.js';
     ListingModerationService,
     ListingsStatsService,
     ListingSearchService,
+    ListingCatalogService,
     ListingEnrichmentService,
     ListingEnrichmentProcessor,
     ListingEventsListener,
   ],
-  exports: [ListingsStatsService],
+  exports: [ListingsStatsService, ListingCatalogService, ListingModerationService],
 })
 export class ListingsModule {}

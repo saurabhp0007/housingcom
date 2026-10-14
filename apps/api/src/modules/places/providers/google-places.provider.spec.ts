@@ -46,16 +46,14 @@ describe('GooglePlacesProvider', () => {
   it('maps details to coordinates', async () => {
     const provider = new GooglePlacesProvider(
       'KEY',
-      vi
-        .fn()
-        .mockResolvedValue(
-          json({
-            id: 'p1',
-            displayName: { text: 'X' },
-            formattedAddress: 'Addr',
-            location: { latitude: 1, longitude: 2 },
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        json({
+          id: 'p1',
+          displayName: { text: 'X' },
+          formattedAddress: 'Addr',
+          location: { latitude: 1, longitude: 2 },
+        }),
+      ),
     );
     expect(await provider.details('p1', undefined)).toEqual({
       id: 'p1',
@@ -66,13 +64,11 @@ describe('GooglePlacesProvider', () => {
   });
 
   it('asks for the nearest metro by distance', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(
-        json({
-          places: [{ displayName: { text: 'HSR Metro' }, location: { latitude: 1, longitude: 2 } }],
-        }),
-      );
+    const fetchMock = vi.fn().mockResolvedValue(
+      json({
+        places: [{ displayName: { text: 'HSR Metro' }, location: { latitude: 1, longitude: 2 } }],
+      }),
+    );
     const provider = new GooglePlacesProvider('KEY', fetchMock);
     expect(await provider.nearest(NearbyPlaceCategory.Metro, { lat: 1, lng: 2 }, 3000)).toEqual({
       name: 'HSR Metro',

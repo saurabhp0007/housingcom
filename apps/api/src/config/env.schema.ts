@@ -54,6 +54,13 @@ export const envSchema = z.object({
   /** Google Places API (New). Optional: without it, search uses our own areas only. */
   GOOGLE_PLACES_API_KEY: optionalString,
 
+  /** Expo push. The access token is only needed when "enhanced push security" is on in Expo. */
+  PUSH_ENABLED: z
+    .enum(['true', 'false', '1', '0'])
+    .default('true')
+    .transform((v) => v === 'true' || v === '1'),
+  EXPO_ACCESS_TOKEN: optionalString,
+
   THROTTLE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
 });

@@ -80,5 +80,28 @@ self-hosted OTA (server, signing, staged rollout, auto-pause, rollback, CLI), an
 
 Create the first admin after signing in once: `pnpm --filter @housingcom/api make-admin --phone +91XXXXXXXXXX`.
 
-Next: favourites, leads (call / WhatsApp / chat), visit requests, reviews, reports and notifications →
-featured plans + Razorpay.
+**Phase 4:**
+
+- **Favourites:** a heart on every card and on the listing page (optimistic). The Saved tab lists saved
+  places and saved searches.
+- **Contact owner:** call, WhatsApp or in-app chat. The owner's number is only revealed to signed-in users,
+  and each enquiry becomes a **lead** in the lister's inbox (counted once per customer for ranking).
+- **Visits:** pick a date and time slot. The owner confirms or declines (with a note) from **Leads**, and the
+  tenant can cancel.
+- **Chat:** real-time over Socket.IO (Redis adapter, so it scales across API instances). Messages are sent
+  over REST, unread counts show on the Inbox tab, and the listing is linked from the thread.
+- **Reviews:** 1–5 stars plus a comment, one per tenant. Only people who contacted the owner or asked to
+  visit can review. Ratings appear on cards and feed the ranking (Bayesian average).
+- **Reports:** users flag a listing with a reason. Admins dismiss the report or take the listing down; the
+  owner sees the reason and can fix and resubmit.
+- **Saved searches + alerts:** save a place plus filters. When a matching listing goes live, a background
+  job (PostGIS + the same filter rules as search) alerts each search once.
+- **Notifications:** an inbox plus Expo push (FCM/APNs) for approvals, rejections, takedowns, verification,
+  new leads, visit updates, chat messages and saved-search matches. Tapping opens the right screen, and dead
+  tokens are pruned. Admins can send **announcements** to everyone or to one city (the user's city follows
+  the location they pick).
+
+Push needs `EAS_PROJECT_ID` in the app's env and `PUSH_ENABLED=true` on the API (plus `EXPO_ACCESS_TOKEN`
+if enhanced push security is on).
+
+Next: featured plans + Razorpay.

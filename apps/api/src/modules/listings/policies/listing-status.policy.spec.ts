@@ -42,4 +42,10 @@ describe('listing status policy', () => {
     expect(transition(S.PendingApproval, A.Submit, verified).allowed).toBe(false);
     expect(transition(S.Live, A.Submit, verified).allowed).toBe(false);
   });
+
+  it('lets admins remove any listing; resubmission always goes back to review', () => {
+    expect(next(transition(S.Live, A.Remove, verified))).toBe(S.Removed);
+    expect(transition(S.Removed, A.Remove, verified).allowed).toBe(false);
+    expect(next(transition(S.Removed, A.Submit, verified))).toBe(S.PendingApproval);
+  });
 });

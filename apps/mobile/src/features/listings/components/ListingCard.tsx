@@ -13,10 +13,12 @@ interface ListingCardProps {
   /** Extra content under the card body (status, stats, actions). */
   footer?: ReactNode;
   badge?: ReactNode;
+  /** Top-right of the photo (e.g. the favourite heart). */
+  accessory?: ReactNode;
 }
 
 /** Image-first card used on Home, search, My listings and admin queues. */
-export function ListingCard({ listing, onPress, footer, badge }: ListingCardProps) {
+export function ListingCard({ listing, onPress, footer, badge, accessory }: ListingCardProps) {
   const { colors, radius, spacing } = useTheme();
   const place = [listing.areaName, listing.cityName].filter(Boolean).join(', ');
 
@@ -55,6 +57,7 @@ export function ListingCard({ listing, onPress, footer, badge }: ListingCardProp
           {listing.isVerifiedLister ? <Pill label="Verified" tone="verified" /> : null}
           {badge}
         </HStack>
+        {accessory ? <View style={styles.accessory}>{accessory}</View> : null}
       </View>
       <VStack gap="xxs" style={{ padding: spacing.md }}>
         <HStack justify="space-between" align="center">
@@ -78,9 +81,23 @@ export function ListingCard({ listing, onPress, footer, badge }: ListingCardProp
             </HStack>
           ) : null}
         </HStack>
-        <AppText variant="bodyStrong" numberOfLines={1}>
-          {listing.title}
-        </AppText>
+        <HStack gap="xs" align="center">
+          <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
+            {listing.title}
+          </AppText>
+          {listing.ratingCount > 0 && listing.ratingAverage !== null ? (
+            <HStack gap="xxs" align="center">
+              <SymbolView
+                name={{ ios: 'star.fill', android: 'star' }}
+                size={12}
+                tintColor={colors.warning}
+              />
+              <AppText variant="caption">
+                {listing.ratingAverage.toFixed(1)} ({listing.ratingCount})
+              </AppText>
+            </HStack>
+          ) : null}
+        </HStack>
         <AppText variant="caption" color="textSecondary" numberOfLines={1}>
           {listingTagline(listing)}
           {listing.foodIncluded ? ' · Food included' : ''}
@@ -100,4 +117,5 @@ const styles = StyleSheet.create({
   card: { borderWidth: 1, overflow: 'hidden' },
   image: { width: '100%', aspectRatio: 16 / 10 },
   overlay: { position: 'absolute', top: 10, left: 10 },
+  accessory: { position: 'absolute', top: 6, right: 6 },
 });

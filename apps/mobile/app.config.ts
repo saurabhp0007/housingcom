@@ -132,5 +132,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     appVariant: APP_VARIANT,
     updateChannel: UPDATE_CHANNEL,
+    // Expo push tokens are scoped to the EAS project.
+    ...(process.env.EAS_PROJECT_ID ? { eas: { projectId: process.env.EAS_PROJECT_ID } } : {}),
   },
 });

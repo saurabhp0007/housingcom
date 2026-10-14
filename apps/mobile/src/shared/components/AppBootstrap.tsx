@@ -1,6 +1,8 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { sessionService } from '@/features/auth/services/session.service';
+import { useChatRealtime } from '@/features/chat/hooks/useChatRealtime';
+import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications';
 import { UpdatingOverlay } from '@/features/app-updates/components/UpdatingOverlay';
 import { useOtaUpdates } from '@/features/app-updates/hooks/useOtaUpdates';
 import {
@@ -41,7 +43,15 @@ export function AppBootstrap({ children }: PropsWithChildren) {
   return (
     <>
       {children}
+      <SessionServices />
       {applyingCritical ? <UpdatingOverlay /> : null}
     </>
   );
+}
+
+/** Signed-in background services: real-time chat and push notifications. */
+function SessionServices() {
+  useChatRealtime();
+  usePushNotifications();
+  return null;
 }

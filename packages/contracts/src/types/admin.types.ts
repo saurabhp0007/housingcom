@@ -5,6 +5,7 @@ export interface AdminDashboardResponse {
   users: { total: number; listers: number; newLast7Days: number };
   listings: { live: number; pendingApproval: number; rejected: number; total: number };
   verifications: { pending: number };
+  reports: { open: number };
 }
 
 export interface VerificationRequestResponse {

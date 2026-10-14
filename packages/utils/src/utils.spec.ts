@@ -3,6 +3,7 @@ import { compareVersions, isVersionBelow } from './version.js';
 import { formatDistance, haversineKm } from './geo.js';
 import { formatRentCompact } from './money.js';
 import { maskPhone, slugify } from './string.js';
+import { timeAgo } from './time.js';
 
 describe('compareVersions', () => {
   it('compares numerically, not lexically', () => {
@@ -36,5 +37,15 @@ describe('formatting', () => {
   it('slugifies and masks', () => {
     expect(slugify('HSR Layout, Sector 2')).toBe('hsr-layout-sector-2');
     expect(maskPhone('+919876543210')).toBe('+91******3210');
+  });
+});
+
+describe('timeAgo', () => {
+  const now = new Date('2026-03-12T15:00:00');
+  it('formats recent times compactly', () => {
+    expect(timeAgo('2026-03-12T14:59:40', now)).toBe('now');
+    expect(timeAgo('2026-03-12T14:35:00', now)).toBe('25m');
+    expect(timeAgo('2026-03-12T09:00:00', now)).toBe('6h');
+    expect(timeAgo('2026-03-11T20:00:00', now)).toBe('Yesterday');
   });
 });

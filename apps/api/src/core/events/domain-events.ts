@@ -48,6 +48,7 @@ export const ListingEvent = {
   Published: 'listing.published',
   Approved: 'listing.approved',
   Rejected: 'listing.rejected',
+  Removed: 'listing.removed',
   StatusChanged: 'listing.status_changed',
   Viewed: 'listing.viewed',
   LocationChanged: 'listing.location_changed',
@@ -83,4 +84,49 @@ export interface UserModeratedEvent {
   userId: string;
   actorId: string;
   reason?: string;
+}
+
+export const EngagementEvent = {
+  LeadCreated: 'lead.created',
+  VisitRequested: 'visit.requested',
+  VisitUpdated: 'visit.updated',
+  MessageSent: 'chat.message_sent',
+  SavedSearchMatched: 'saved_search.matched',
+} as const;
+
+export interface LeadCreatedEvent {
+  leadId: string;
+  listingId: string;
+  ownerId: string;
+  customerId: string;
+  channel: string;
+}
+
+export interface VisitEvent {
+  visitId: string;
+  listingId: string;
+  ownerId: string;
+  customerId: string;
+  status: string;
+  date: string;
+  slot: string;
+  /** Who caused the change. */
+  actorId: string;
+}
+
+export interface MessageSentEvent {
+  messageId: string;
+  conversationId: string;
+  listingId: string;
+  senderId: string;
+  recipientId: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface SavedSearchMatchedEvent {
+  userId: string;
+  savedSearchId: string;
+  label: string;
+  listingId: string;
 }

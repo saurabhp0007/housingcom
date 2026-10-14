@@ -2,7 +2,6 @@ import type {
   ListingFilters,
   ListingSort,
   ListingStatus,
-  ListingType,
   MapResponse,
   NearbyPlaceCategory,
   Paginated,
@@ -69,5 +68,10 @@ export interface ListingsRepository {
   map(params: MapParams): Promise<MapResponse>;
   similar(listing: Listing, limit: number): Promise<ListingRow[]>;
   findNearbyPlaces(listingId: string): Promise<NearbyPlaceRow[]>;
+
+  // ── Phase 4: engagement ──
+  findRowsByIds(ids: string[]): Promise<ListingRow[]>;
+  incrementContacts(id: string): Promise<void>;
+  setRating(id: string, average: number | null, count: number): Promise<void>;
   replaceNearbyPlaces(listingId: string, places: NearbyPlaceRow[]): Promise<void>;
 }

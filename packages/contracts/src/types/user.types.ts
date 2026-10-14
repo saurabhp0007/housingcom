@@ -9,6 +9,8 @@ export interface UserResponse {
   roles: UserRole[];
   status: UserStatus;
   lister: ListerProfileResponse | null;
+  /** City the user browses (for city-wide announcements). */
+  preferredCityId: string | null;
   createdAt: string;
 }
 

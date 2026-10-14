@@ -42,6 +42,8 @@ export class ListingMapper {
       coverUrl: this.urls.url(coverKey),
       isVerifiedLister,
       publishedAt: l.publishedAt?.toISOString() ?? null,
+      ratingAverage: l.ratingAverage,
+      ratingCount: l.ratingCount,
       ...(distanceKm !== undefined ? { distanceKm: round2(distanceKm) } : {}),
     };
   }

@@ -21,6 +21,11 @@ export const EVENT_WEIGHTS: Record<ListingEventType, number> = {
 export const FRESHNESS_DECAY_DAYS = 14;
 export const POPULARITY_SATURATION = 50;
 export const CONTACT_POPULARITY_MULTIPLIER = 5;
+/** Bayesian prior for ratings: listings start as if they had PRIOR_COUNT reviews of PRIOR_RATING. */
+export const RATING_PRIOR = 3.5;
+export const RATING_PRIOR_COUNT = 3;
+/** Share of "popularity" that comes from ratings vs. views/contacts. */
+export const RATING_SHARE_OF_POPULARITY = 0.3;
 
 /** Weights are normalised so they always sum to 1, whatever admins enter. */
 export function normaliseWeights(w: RecommendationWeights): RecommendationWeights {

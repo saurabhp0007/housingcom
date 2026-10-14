@@ -19,6 +19,7 @@ export function toUserResponse(user: User): UserResponse {
           verifiedAt: lister.verifiedAt?.toISOString() ?? null,
         }
       : null,
+    preferredCityId: user.preferredCityId,
     createdAt: user.createdAt.toISOString(),
   };
 }

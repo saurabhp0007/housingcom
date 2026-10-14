@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsUrl, Length, MaxLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUrl, IsUUID, Length, MaxLength } from 'class-validator';
 import type { UpdateProfileInput } from '@housingcom/contracts';
 
 export class UpdateProfileDto implements UpdateProfileInput {
@@ -17,4 +17,9 @@ export class UpdateProfileDto implements UpdateProfileInput {
   @IsUrl({ protocols: ['https'], require_protocol: true })
   @MaxLength(512)
   avatarUrl?: string;
+
+  /** Set by the app when the user picks a city. */
+  @IsOptional()
+  @IsUUID()
+  preferredCityId?: string;
 }

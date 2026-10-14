@@ -1,23 +1,6 @@
 import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsLatitude,
-  IsLongitude,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Length,
-  Max,
-  Min,
-} from 'class-validator';
-import {
-  ListingSort,
-  ListingStatus,
-  ListingType,
-  type BrowseListingsQuery,
-} from '@housingcom/contracts';
+import { IsIn, IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { ListingStatus } from '@housingcom/contracts';
 
 export class MyListingsQueryDto {
   @IsOptional()

@@ -36,6 +36,11 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   lastLoginAt: Date | null;
 
+  /** City the user browses; targets city-wide announcements. */
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  preferredCityId: string | null;
+
   @OneToOne(() => ListerProfile, (profile) => profile.user)
   listerProfile?: Relation<ListerProfile> | null;
 }

@@ -6,4 +6,14 @@ export const env = {
   googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
   appVariant: (Constants.expoConfig?.extra?.appVariant as string | undefined) ?? 'development',
   appVersion: Constants.expoConfig?.version ?? '0.0.0',
+  /** Socket.IO server (chat); the API's origin unless overridden. */
+  socketUrl:
+    process.env.EXPO_PUBLIC_SOCKET_URL ??
+    (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000/api').replace(
+      /^(https?:\/\/[^/]+).*$/,
+      '$1',
+    ),
+  easProjectId:
+    (Constants.expoConfig?.extra?.eas as { projectId?: string } | undefined)?.projectId ??
+    Constants.easConfig?.projectId,
 } as const;
